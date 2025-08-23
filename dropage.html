@@ -248,6 +248,10 @@
         background: #ff8e94;
         box-shadow: 0 0 22px #ff5f66;
       }
+      .pivot {
+        background: linear-gradient(120deg, #ffd780 0%, #ffb86b 100%);
+        box-shadow: 0 0 22px #ffd05a;
+      }
 
       /* Step info message */
       #step-info {
@@ -545,6 +549,7 @@
       let arrayData = [];
       let bubbleState = null;
       let mergeState = null;
+      let quickState = null;
       let timer = null;
 
       // Utility functions
@@ -559,11 +564,12 @@
         clearTimer();
         bubbleState = null;
         mergeState = null;
+        quickState = null;
         drawArray(arrayData);
         updateStepInfo("Visualization reset. Ready to start.");
       }
 
-      function drawArray(arr, highlights = [], swaps = []) {
+      function drawArray(arr, highlights = [], swaps = [], pivots = []) {
         viz.innerHTML = "";
         if (arr.length === 0) {
           viz.textContent = "Enter an array above.";
@@ -588,12 +594,14 @@
           label.className = "array-value";
           label.textContent = arr[i];
           if (swaps.includes(i)) label.classList.add("swap");
+          else if (pivots.includes(i)) label.classList.add("pivot");
           else if (highlights.includes(i)) label.classList.add("highlight");
 
           const bar = document.createElement("div");
           bar.className = "bar";
           bar.style.height = (arr[i] / maxVal) * 90 + "%";
           if (swaps.includes(i)) bar.classList.add("swap");
+          else if (pivots.includes(i)) bar.classList.add("pivot");
           else if (highlights.includes(i)) bar.classList.add("highlight");
 
           container.appendChild(label);
@@ -690,7 +698,7 @@
         }
       }
 
-      // --- Merge Sort animation logic (fixed & stepwise merge) ---
+      // --- Merge Sort animation logic (unchanged from previous fix) ---
       function startMergeSort(stepMode = false) {
         if (arrayData.length < 2) return;
         mergeState = {
@@ -822,6 +830,123 @@
         if (mergeState.stepMode) return;
       }
 
+      // --- Quick Sort animation logic (new) ---
+      function startQuickSort(stepMode = false) {
+        if (arrayData.length < 2) return;
+        quickState = {
+          arr: arrayData.slice(), // working array that we mutate in place
+          tasks: [], // stack of segments to process {low, high}
+          current: null, // current partition in-progress
+          stepMode,
+        };
+        // initial task: whole array
+        quickState.tasks.push({ low: 0, high: quickState.arr.length - 1 });
+        clearTimer();
+        drawArray(quickState.arr);
+        if (stepMode) quickSortStep();
+        else timer = setInterval(quickSortStep, 650);
+      }
+
+      // Each partition task's structure:
+      // { low, high, pivot, i, j, phase }
+      // phase: 'init' -> set pivot; 'partition' -> scanning j; 'finalize' -> swap pivot; 'done'
+      function quickSortStep() {
+        if (!quickState) return;
+
+        // If no in-progress partition, pop next task
+        if (!quickState.current) {
+          if (quickState.tasks.length === 0) {
+            // completed
+            clearTimer();
+            drawArray(quickState.arr, [], [], []);
+            updateStepInfo("Quick Sort Completed!");
+            return;
+          }
+
+          const seg = quickState.tasks.pop(); // LIFO for depth-first quicksort
+          const { low, high } = seg;
+          if (low >= high) {
+            // nothing to sort
+            if (quickState.stepMode) return;
+            else return; // move to next task automatically
+          }
+
+          quickState.current = {
+            low,
+            high,
+            pivot: quickState.arr[high],
+            i: low,
+            j: low,
+            phase: "partition",
+            swapsThisStep: [],
+          };
+
+          updateStepInfo(
+            `Partitioning range [${low}..${high}] with pivot ${quickState.current.pivot}`
+          );
+          // highlight range and pivot
+          drawArray(
+            quickState.arr,
+            Array.from({ length: high - low + 1 }, (_, idx) => low + idx),
+            [],
+            [high]
+          );
+          if (quickState.stepMode) return;
+        }
+
+        const c = quickState.current;
+        // partition loop: for j in [low..high-1]
+        if (c.j <= c.high - 1) {
+          const comparingIndex = c.j;
+          if (c.arr[c.j] < c.pivot) {
+            // swap arr[i] and arr[j]
+            [c.arr[c.i], c.arr[c.j]] = [c.arr[c.j], c.arr[c.i]];
+            c.swapsThisStep = [c.i, c.j];
+            updateStepInfo(
+              `Swapping ${c.arr[c.i]} and ${
+                c.arr[c.j]
+              } (placing smaller than pivot)`
+            );
+            drawArray(c.arr, [c.i, c.j], c.swapsThisStep, [c.high]);
+            c.i++;
+            c.j++;
+            if (quickState.stepMode) return;
+          } else {
+            updateStepInfo(
+              `Comparing ${c.arr[c.j]} >= pivot ${c.pivot}, move j`
+            );
+            drawArray(c.arr, [c.j], [], [c.high]);
+            c.j++;
+            if (quickState.stepMode) return;
+          }
+        } else if (c.j === c.high) {
+          // finished scanning, now swap pivot into position i
+          [c.arr[c.i], c.arr[c.high]] = [c.arr[c.high], c.arr[c.i]];
+          const pivotIndex = c.i;
+          updateStepInfo(`Placing pivot ${c.pivot} at index ${pivotIndex}`);
+          drawArray(c.arr, [], [c.i, c.high], [pivotIndex]);
+          // push new segments to stack: right and left
+          const leftLow = c.low;
+          const leftHigh = pivotIndex - 1;
+          const rightLow = pivotIndex + 1;
+          const rightHigh = c.high;
+
+          // clear current
+          quickState.current = null;
+
+          // push right then left so left is processed next (LIFO)
+          if (rightLow < rightHigh)
+            quickState.tasks.push({ low: rightLow, high: rightHigh });
+          if (leftLow < leftHigh)
+            quickState.tasks.push({ low: leftLow, high: leftHigh });
+
+          if (quickState.stepMode) return;
+        } else {
+          // safety fallback
+          quickState.current = null;
+        }
+      }
+
       // Dropdown menu expand/collapse on click
       document.querySelectorAll("#topics .dropdown").forEach((dropdown) => {
         dropdown.addEventListener("click", (e) => {
@@ -887,6 +1012,8 @@
         if (currentAlgorithm.toLowerCase() === "bubble sort") startBubbleSort();
         else if (currentAlgorithm.toLowerCase() === "merge sort")
           startMergeSort();
+        else if (currentAlgorithm.toLowerCase() === "quick sort")
+          startQuickSort();
         else alert("Animation not yet implemented for this algorithm.");
       });
       pauseBtn.addEventListener("click", () => clearTimer());
@@ -898,6 +1025,9 @@
         } else if (currentAlgorithm.toLowerCase() === "merge sort") {
           if (!mergeState) startMergeSort(true);
           else mergeSortStep();
+        } else if (currentAlgorithm.toLowerCase() === "quick sort") {
+          if (!quickState) startQuickSort(true);
+          else quickSortStep();
         }
       });
       resetBtn.addEventListener("click", resetVisualization);
@@ -929,12 +1059,58 @@
           algoTitle.textContent = "Bubble Sort";
           algoDesc.textContent =
             "Bubble Sort repeatedly compares adjacent elements and swaps if out of order.";
-          algoCode.textContent = `function bubbleSort(arr){\n  for(let i=0; i<arr.length-1; i++){\n    for(let j=0; j<arr.length-1-i; j++){\n      if(arr[j]>arr[j+1]){\n        [arr[j], arr[j+1]] = [arr[j+1], arr[j]];\n      }\n    }\n  }\n  return arr;\n}`;
+          algoCode.textContent = `function bubbleSort(arr){
+  for(let i=0; i<arr.length-1; i++){
+    for(let j=0; j<arr.length-1-i; j++){
+      if(arr[j]>arr[j+1]){
+        [arr[j], arr[j+1]] = [arr[j+1], arr[j]];
+      }
+    }
+  }
+  return arr;
+}`;
         } else if (algo.toLowerCase() === "merge sort") {
           algoTitle.textContent = "Merge Sort";
           algoDesc.textContent =
             "Merge Sort divides the list, recursively sorts halves, and merges sorted halves.";
-          algoCode.textContent = `function mergeSort(arr){\n  if(arr.length<=1) return arr;\n  let mid = Math.floor(arr.length/2);\n  let left = mergeSort(arr.slice(0,mid));\n  let right = mergeSort(arr.slice(mid));\n  return merge(left,right);\n}\nfunction merge(left,right){\n  let res=[], i=0, j=0;\n  while(i<left.length && j<right.length){\n    if(left[i]<=right[j]) res.push(left[i++]);\n    else res.push(right[j++]);\n  }\n  return res.concat(left.slice(i)).concat(right.slice(j));\n}`;
+          algoCode.textContent = `function mergeSort(arr){
+  if(arr.length<=1) return arr;
+  let mid = Math.floor(arr.length/2);
+  let left = mergeSort(arr.slice(0,mid));
+  let right = mergeSort(arr.slice(mid));
+  return merge(left,right);
+}
+function merge(left,right){
+  let res=[], i=0, j=0;
+  while(i<left.length && j<right.length){
+    if(left[i]<=right[j]) res.push(left[i++]);
+    else res.push(right[j++]);
+  }
+  return res.concat(left.slice(i)).concat(right.slice(j));
+}`;
+        } else if (algo.toLowerCase() === "quick sort") {
+          algoTitle.textContent = "Quick Sort";
+          algoDesc.textContent =
+            "Quick Sort picks a pivot, partitions the array around the pivot, and recursively sorts partitions. This visualizer uses an in-place Lomuto partition and performs partitioning step-by-step so you can see individual swaps.";
+          algoCode.textContent = `function quickSort(arr, low=0, high=arr.length-1){
+  if(low<high){
+    let p = partition(arr, low, high);
+    quickSort(arr, low, p-1);
+    quickSort(arr, p+1, high);
+  }
+}
+function partition(arr, low, high){
+  let pivot = arr[high];
+  let i = low;
+  for(let j=low; j<high; j++){
+    if(arr[j] < pivot){
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+      i++;
+    }
+  }
+  [arr[i], arr[high]] = [arr[high], arr[i]];
+  return i;
+}`;
         } else {
           algoTitle.textContent = algo;
           algoDesc.textContent = "Description not available.";
@@ -951,12 +1127,58 @@
           title = "Bubble Sort";
           desc =
             "Bubble Sort repeatedly compares adjacent elements and swaps if out of order.";
-          code = `function bubbleSort(arr){\n  for(let i=0; i<arr.length-1; i++){\n    for(let j=0; j<arr.length-1-i; j++){\n      if(arr[j]>arr[j+1]){\n        [arr[j], arr[j+1]] = [arr[j+1], arr[j]];\n      }\n    }\n  }\n  return arr;\n}`;
+          code = `function bubbleSort(arr){
+  for(let i=0; i<arr.length-1; i++){
+    for(let j=0; j<arr.length-1-i; j++){
+      if(arr[j]>arr[j+1]){
+        [arr[j], arr[j+1]] = [arr[j+1], arr[j]];
+      }
+    }
+  }
+  return arr;
+}`;
         } else if (algo.toLowerCase() === "merge sort") {
           title = "Merge Sort";
           desc =
             "Merge Sort divides the list, recursively sorts halves, and merges sorted halves.";
-          code = `function mergeSort(arr){\n  if(arr.length<=1) return arr;\n  let mid = Math.floor(arr.length/2);\n  let left = mergeSort(arr.slice(0,mid));\n  let right = mergeSort(arr.slice(mid));\n  return merge(left,right);\n}\nfunction merge(left,right){\n  let res=[], i=0, j=0;\n  while(i<left.length && j<right.length){\n    if(left[i]<=right[j]) res.push(left[i++]);\n    else res.push(right[j++]);\n  }\n  return res.concat(left.slice(i)).concat(right.slice(j));\n}`;
+          code = `function mergeSort(arr){
+  if(arr.length<=1) return arr;
+  let mid = Math.floor(arr.length/2);
+  let left = mergeSort(arr.slice(0,mid));
+  let right = mergeSort(arr.slice(mid));
+  return merge(left,right);
+}
+function merge(left,right){
+  let res=[], i=0, j=0;
+  while(i<left.length && j<right.length){
+    if(left[i]<=right[j]) res.push(left[i++]);
+    else res.push(right[j++]);
+  }
+  return res.concat(left.slice(i)).concat(right.slice(j));
+}`;
+        } else if (algo.toLowerCase() === "quick sort") {
+          title = "Quick Sort";
+          desc =
+            "Quick Sort picks a pivot, partitions the array around the pivot, and recursively sorts partitions. This visualizer uses an in-place Lomuto partition and performs partitioning step-by-step so you can see individual swaps.";
+          code = `function quickSort(arr, low=0, high=arr.length-1){
+  if(low<high){
+    let p = partition(arr, low, high);
+    quickSort(arr, low, p-1);
+    quickSort(arr, p+1, high);
+  }
+}
+function partition(arr, low, high){
+  let pivot = arr[high];
+  let i = low;
+  for(let j=low; j<high; j++){
+    if(arr[j] < pivot){
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+      i++;
+    }
+  }
+  [arr[i], arr[high]] = [arr[high], arr[i]];
+  return i;
+}`;
         } else {
           title = algo;
           desc = "Description not available.";
