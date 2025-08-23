@@ -550,7 +550,7 @@
       // Utility functions
       function clearTimer() {
         if (timer) {
-          clearTimeout(timer);
+          clearInterval(timer);
           timer = null;
         }
       }
@@ -606,7 +606,7 @@
         stepInfo.textContent = text;
       }
 
-      // Bubble Sort animation logic
+      // Bubble Sort animation logic (unchanged)
       async function animateSwap(el1, el2) {
         return new Promise((resolve) => {
           const rect1 = el1.getBoundingClientRect();
@@ -690,79 +690,136 @@
         }
       }
 
-      // Merge Sort animation logic
+      // --- Merge Sort animation logic (fixed & stepwise merge) ---
       function startMergeSort(stepMode = false) {
         if (arrayData.length < 2) return;
         mergeState = {
-          arr: arrayData.slice(),
-          displayArr: arrayData.slice(),
-          actions: [],
-          currentStep: 0,
-          highlights: [],
+          arr: arrayData.slice(), // original array reference
+          displayArr: arrayData.slice(), // what we render and update step-by-step
+          tasks: [], // list of merge tasks (start, mid, end) in postorder
+          currentTaskIndex: 0,
+          currentMerge: null, // holds in-progress merge state
           stepMode,
         };
         clearTimer();
-        mergeState.actions = [];
-        generateMergeActions(0, mergeState.arr.length - 1, mergeState.actions);
+        // generate merge tasks in post-order (so dependencies resolved)
+        mergeState.tasks = [];
+        generateMergeTasks(0, mergeState.arr.length - 1, mergeState.tasks);
+        drawArray(mergeState.displayArr);
         if (stepMode) mergeSortStep();
-        else timer = setInterval(mergeSortStep, 1000);
+        else timer = setInterval(mergeSortStep, 750);
       }
-      function generateMergeActions(start, end, actions) {
+
+      // generate tasks: each task = {start, mid, end}
+      function generateMergeTasks(start, end, tasks) {
         if (start >= end) return;
         const mid = Math.floor((start + end) / 2);
-        generateMergeActions(start, mid, actions);
-        generateMergeActions(mid + 1, end, actions);
-        actions.push({ start, mid, end });
+        generateMergeTasks(start, mid, tasks);
+        generateMergeTasks(mid + 1, end, tasks);
+        tasks.push({ start, mid, end });
       }
+
       function mergeSortStep() {
         if (!mergeState) return;
-        if (mergeState.currentStep >= mergeState.actions.length) {
-          clearTimer();
+
+        // If no current merge in progress, fetch next task
+        if (!mergeState.currentMerge) {
+          if (mergeState.currentTaskIndex >= mergeState.tasks.length) {
+            // done
+            clearTimer();
+            drawArray(
+              mergeState.displayArr,
+              [],
+              [...Array(mergeState.arr.length).keys()]
+            );
+            updateStepInfo("Merge Sort Completed!");
+            return;
+          }
+
+          const task = mergeState.tasks[mergeState.currentTaskIndex];
+          const { start, mid, end } = task;
+          // capture left and right as they are before this merge begins
+          const left = mergeState.displayArr.slice(start, mid + 1);
+          const right = mergeState.displayArr.slice(mid + 1, end + 1);
+
+          mergeState.currentMerge = {
+            start,
+            mid,
+            end,
+            left,
+            right,
+            i: 0,
+            j: 0,
+            k: 0, // number of elements written so far into [start..end]
+          };
+
+          updateStepInfo(
+            `Starting merge for indices [${start}..${mid}] and [${
+              mid + 1
+            }..${end}]`
+          );
+          // highlight the range being merged
           drawArray(
             mergeState.displayArr,
-            [],
-            [...Array(mergeState.arr.length).keys()]
+            Array.from({ length: end - start + 1 }, (_, idx) => start + idx)
           );
-          updateStepInfo("Merge Sort Completed!");
-          return;
+          if (mergeState.stepMode) return; // on step mode show initial highlight then return
         }
-        const { start, mid, end } = mergeState.actions[mergeState.currentStep];
-        mergeState.highlights = [];
-        for (let k = start; k <= end; k++) mergeState.highlights.push(k);
-        updateStepInfo(
-          `Merging indices [${start} - ${mid}] and [${
-            mid + 1
-          } - ${end}]. Step ${mergeState.currentStep + 1} of ${
-            mergeState.actions.length
-          }`
-        );
 
-        const left = mergeState.displayArr.slice(start, mid + 1);
-        const right = mergeState.displayArr.slice(mid + 1, end + 1);
+        // progress current merge by one write
+        const m = mergeState.currentMerge;
+        const writeIndex = m.start + m.k;
+        let valueToWrite;
+        let infoMsg = "";
 
-        let i = 0,
-          j = 0;
-        const merged = [];
-        while (i < left.length && j < right.length) {
-          if (left[i] <= right[j]) merged.push(left[i++]);
-          else merged.push(right[j++]);
+        if (m.i < m.left.length && m.j < m.right.length) {
+          if (m.left[m.i] <= m.right[m.j]) {
+            valueToWrite = m.left[m.i++];
+            infoMsg = `Placing ${valueToWrite} from left at index ${writeIndex}`;
+          } else {
+            valueToWrite = m.right[m.j++];
+            infoMsg = `Placing ${valueToWrite} from right at index ${writeIndex}`;
+          }
+        } else if (m.i < m.left.length) {
+          valueToWrite = m.left[m.i++];
+          infoMsg = `Draining left: placing ${valueToWrite} at index ${writeIndex}`;
+        } else {
+          valueToWrite = m.right[m.j++];
+          infoMsg = `Draining right: placing ${valueToWrite} at index ${writeIndex}`;
         }
-        while (i < left.length) merged.push(left[i++]);
-        while (j < right.length) merged.push(right[j++]);
 
-        setTimeout(() => {
-          for (let k = 0; k < merged.length; k++) {
-            mergeState.displayArr[start + k] = merged[k];
-          }
-          mergeState.currentStep++;
-          mergeState.highlights = [];
-          drawArray(mergeState.displayArr, [], []);
-          if (mergeState.currentStep >= mergeState.actions.length) {
-            updateStepInfo("Merge Sort Completed!");
-            clearTimer();
-          }
-        }, 700);
-        if (mergeState.stepMode) mergeState.currentStep++;
+        // write the value into displayArr
+        mergeState.displayArr[writeIndex] = valueToWrite;
+        m.k++;
+
+        // render and highlight the written index
+        drawArray(mergeState.displayArr, [writeIndex], []);
+        updateStepInfo(infoMsg);
+
+        // if merge finished, clear currentMerge and advance to next task
+        if (m.k >= m.left.length + m.right.length) {
+          mergeState.currentMerge = null;
+          mergeState.currentTaskIndex++;
+          // small pause visualizing the finished merge range
+          const finishedStart =
+            mergeState.tasks[Math.max(0, mergeState.currentTaskIndex - 1)]
+              .start;
+          const finishedEnd =
+            mergeState.tasks[Math.max(0, mergeState.currentTaskIndex - 1)].end;
+          drawArray(
+            mergeState.displayArr,
+            Array.from(
+              { length: finishedEnd - finishedStart + 1 },
+              (_, idx) => finishedStart + idx
+            )
+          );
+          updateStepInfo(
+            `Completed merge for indices [${finishedStart}..${finishedEnd}]`
+          );
+        }
+
+        // If in step mode, we should only do one small unit of work per click.
+        if (mergeState.stepMode) return;
       }
 
       // Dropdown menu expand/collapse on click
@@ -872,35 +929,12 @@
           algoTitle.textContent = "Bubble Sort";
           algoDesc.textContent =
             "Bubble Sort repeatedly compares adjacent elements and swaps if out of order.";
-          algoCode.textContent = `function bubbleSort(arr){
-  for(let i=0; i<arr.length-1; i++){
-    for(let j=0; j<arr.length-1-i; j++){
-      if(arr[j]>arr[j+1]){
-        [arr[j], arr[j+1]] = [arr[j+1], arr[j]];
-      }
-    }
-  }
-  return arr;
-}`;
+          algoCode.textContent = `function bubbleSort(arr){\n  for(let i=0; i<arr.length-1; i++){\n    for(let j=0; j<arr.length-1-i; j++){\n      if(arr[j]>arr[j+1]){\n        [arr[j], arr[j+1]] = [arr[j+1], arr[j]];\n      }\n    }\n  }\n  return arr;\n}`;
         } else if (algo.toLowerCase() === "merge sort") {
           algoTitle.textContent = "Merge Sort";
           algoDesc.textContent =
             "Merge Sort divides the list, recursively sorts halves, and merges sorted halves.";
-          algoCode.textContent = `function mergeSort(arr){
-  if(arr.length<=1) return arr;
-  let mid = Math.floor(arr.length/2);
-  let left = mergeSort(arr.slice(0,mid));
-  let right = mergeSort(arr.slice(mid));
-  return merge(left,right);
-}
-function merge(left,right){
-  let res=[], i=0, j=0;
-  while(i<left.length && j<right.length){
-    if(left[i]<=right[j]) res.push(left[i++]);
-    else res.push(right[j++]);
-  }
-  return res.concat(left.slice(i)).concat(right.slice(j));
-}`;
+          algoCode.textContent = `function mergeSort(arr){\n  if(arr.length<=1) return arr;\n  let mid = Math.floor(arr.length/2);\n  let left = mergeSort(arr.slice(0,mid));\n  let right = mergeSort(arr.slice(mid));\n  return merge(left,right);\n}\nfunction merge(left,right){\n  let res=[], i=0, j=0;\n  while(i<left.length && j<right.length){\n    if(left[i]<=right[j]) res.push(left[i++]);\n    else res.push(right[j++]);\n  }\n  return res.concat(left.slice(i)).concat(right.slice(j));\n}`;
         } else {
           algoTitle.textContent = algo;
           algoDesc.textContent = "Description not available.";
@@ -917,35 +951,12 @@ function merge(left,right){
           title = "Bubble Sort";
           desc =
             "Bubble Sort repeatedly compares adjacent elements and swaps if out of order.";
-          code = `function bubbleSort(arr){
-  for(let i=0; i<arr.length-1; i++){
-    for(let j=0; j<arr.length-1-i; j++){
-      if(arr[j]>arr[j+1]){
-        [arr[j], arr[j+1]] = [arr[j+1], arr[j]];
-      }
-    }
-  }
-  return arr;
-}`;
+          code = `function bubbleSort(arr){\n  for(let i=0; i<arr.length-1; i++){\n    for(let j=0; j<arr.length-1-i; j++){\n      if(arr[j]>arr[j+1]){\n        [arr[j], arr[j+1]] = [arr[j+1], arr[j]];\n      }\n    }\n  }\n  return arr;\n}`;
         } else if (algo.toLowerCase() === "merge sort") {
           title = "Merge Sort";
           desc =
             "Merge Sort divides the list, recursively sorts halves, and merges sorted halves.";
-          code = `function mergeSort(arr){
-  if(arr.length<=1) return arr;
-  let mid = Math.floor(arr.length/2);
-  let left = mergeSort(arr.slice(0,mid));
-  let right = mergeSort(arr.slice(mid));
-  return merge(left,right);
-}
-function merge(left,right){
-  let res=[], i=0, j=0;
-  while(i<left.length && j<right.length){
-    if(left[i]<=right[j]) res.push(left[i++]);
-    else res.push(right[j++]);
-  }
-  return res.concat(left.slice(i)).concat(right.slice(j));
-}`;
+          code = `function mergeSort(arr){\n  if(arr.length<=1) return arr;\n  let mid = Math.floor(arr.length/2);\n  let left = mergeSort(arr.slice(0,mid));\n  let right = mergeSort(arr.slice(mid));\n  return merge(left,right);\n}\nfunction merge(left,right){\n  let res=[], i=0, j=0;\n  while(i<left.length && j<right.length){\n    if(left[i]<=right[j]) res.push(left[i++]);\n    else res.push(right[j++]);\n  }\n  return res.concat(left.slice(i)).concat(right.slice(j));\n}`;
         } else {
           title = algo;
           desc = "Description not available.";
