@@ -2,1410 +2,968 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AlgoViz Pro - Interactive Algorithm Visualizer</title>
+    <title>Futuristic Algorithm Visualizer</title>
+    <link
+      href="https://fonts.googleapis.com/css?family=Orbitron:700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css?family=Quicksand:500,700&display=swap"
+      rel="stylesheet"
+    />
     <style>
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
-
+      /* Root colors and fonts */
       :root {
-        --primary: #667eea;
-        --secondary: #764ba2;
-        --accent: #f093fb;
-        --success: #4ade80;
-        --warning: #fbbf24;
-        --danger: #f87171;
-        --dark: #1e293b;
-        --light: #f1f5f9;
-        --glass: rgba(255, 255, 255, 0.1);
-        --glass-border: rgba(255, 255, 255, 0.2);
+        --main-bg: linear-gradient(120deg, #d8eafe 70%, #e2dfe8 100%);
+        --card-bg: rgba(255, 255, 255, 0.25);
+        --glass-bg: rgba(255, 255, 255, 0.4);
+        --glass-border: rgba(255, 255, 255, 0.5);
+        --glass-shadow: 0 4px 32px 0 rgba(163, 208, 255, 0.25);
+        --neon-blue: #77e7ff;
+        --neon-green: #93e9be;
+        --periwinkle: #ccccff;
+        --accent-blue: #4da3d4;
+        --glow: 0 0 12px 3px #acdaff;
+        --font-head: "Orbitron", Arial, sans-serif;
+        --font-menu: "Quicksand", Arial, sans-serif;
       }
 
+      /* Body setup */
       body {
-        font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
-          sans-serif;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        margin: 0;
         min-height: 100vh;
+        background: var(--main-bg);
+        font-family: var(--font-menu);
+        color: #19385a;
         overflow-x: hidden;
-        position: relative;
       }
 
-      /* Animated background */
-      .bg-animation {
+      /* Background glow shape */
+      #main-bg {
         position: fixed;
-        width: 100%;
-        height: 100%;
-        top: 0;
+        z-index: -2;
         left: 0;
-        z-index: -1;
-        overflow: hidden;
-      }
-
-      .bg-animation::before {
-        content: "";
-        position: absolute;
-        width: 200%;
-        height: 200%;
-        top: -50%;
-        left: -50%;
+        top: 0;
+        width: 100vw;
+        height: 100vh;
         background: radial-gradient(
-          circle,
-          rgba(240, 147, 251, 0.4) 0%,
-          transparent 70%
+          circle at center 33%,
+          #b0eafa33 0%,
+          #e0d9fd 88%
         );
-        animation: rotate 30s linear infinite;
       }
 
-      .bg-animation::after {
-        content: "";
-        position: absolute;
-        width: 150%;
-        height: 150%;
-        bottom: -50%;
-        right: -50%;
-        background: radial-gradient(
-          circle,
-          rgba(102, 126, 234, 0.4) 0%,
-          transparent 70%
-        );
-        animation: rotate-reverse 25s linear infinite;
-      }
-
-      @keyframes rotate {
-        0% {
-          transform: rotate(0deg);
-        }
-        100% {
-          transform: rotate(360deg);
-        }
-      }
-
-      @keyframes rotate-reverse {
-        0% {
-          transform: rotate(360deg);
-        }
-        100% {
-          transform: rotate(0deg);
-        }
-      }
-
-      /* Floating particles */
-      .particle {
+      /* Sidebar styling for glass effect */
+      #sidebar {
+        width: 270px;
+        height: 100vh;
+        background: var(--glass-bg);
+        border-right: 2px solid var(--glass-border);
+        box-shadow: var(--glass-shadow);
+        backdrop-filter: blur(16px) saturate(150%);
+        -webkit-backdrop-filter: blur(16px) saturate(150%);
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        padding-top: 48px;
         position: fixed;
-        pointer-events: none;
-        opacity: 0.5;
-        animation: float 20s infinite linear;
-      }
-
-      @keyframes float {
-        0% {
-          transform: translateY(100vh) translateX(0) rotate(0deg);
-          opacity: 0;
-        }
-        10% {
-          opacity: 0.5;
-        }
-        90% {
-          opacity: 0.5;
-        }
-        100% {
-          transform: translateY(-100vh) translateX(100px) rotate(720deg);
-          opacity: 0;
-        }
-      }
-
-      /* Header */
-      .header {
-        background: var(--glass);
-        backdrop-filter: blur(20px);
-        border-bottom: 1px solid var(--glass-border);
-        padding: 1.5rem 2rem;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        position: sticky;
+        left: 0;
         top: 0;
-        z-index: 100;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        z-index: 2;
+        gap: 40px;
       }
 
-      .logo {
-        font-size: 2rem;
-        font-weight: 800;
-        background: linear-gradient(135deg, #fff, #f093fb);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-        letter-spacing: -1px;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-      }
-
-      .logo-icon {
-        width: 40px;
-        height: 40px;
-        background: linear-gradient(135deg, var(--accent), var(--primary));
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.5rem;
-        animation: pulse-glow 2s ease-in-out infinite;
-      }
-
-      @keyframes pulse-glow {
-        0%,
-        100% {
-          box-shadow: 0 0 20px rgba(240, 147, 251, 0.5);
-        }
-        50% {
-          box-shadow: 0 0 40px rgba(240, 147, 251, 0.8);
-        }
-      }
-
-      /* Main container */
-      .container {
-        max-width: 1400px;
-        margin: 2rem auto;
-        padding: 0 2rem;
-        display: grid;
-        grid-template-columns: 250px 1fr;
-        gap: 2rem;
-      }
-
-      /* Sidebar */
-      .sidebar {
-        background: var(--glass);
-        backdrop-filter: blur(20px);
-        border: 1px solid var(--glass-border);
-        border-radius: 20px;
-        padding: 1.5rem;
-        height: fit-content;
-        position: sticky;
-        top: 100px;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-      }
-
-      .sidebar h3 {
-        color: white;
-        margin-bottom: 1rem;
-        font-size: 1.2rem;
-        opacity: 0.9;
-      }
-
-      .algo-category {
-        margin-bottom: 1rem;
-      }
-
-      .category-title {
-        color: rgba(255, 255, 255, 0.7);
-        font-size: 0.9rem;
-        font-weight: 600;
-        margin-bottom: 0.5rem;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-      }
-
-      .algo-btn {
+      /* Sidebar header */
+      #sidebar h2 {
+        font-family: var(--font-head);
+        color: #b5ecfa;
+        font-size: 2.7rem;
+        font-weight: 700;
+        letter-spacing: 2px;
+        margin: 0 0 48px 24px;
+        text-shadow: var(--glow);
         width: 100%;
-        padding: 0.75rem 1rem;
-        background: rgba(255, 255, 255, 0.1);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        color: white;
-        border-radius: 10px;
-        cursor: pointer;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        margin-bottom: 0.5rem;
-        font-size: 0.95rem;
         text-align: left;
-        position: relative;
-        overflow: hidden;
       }
 
-      .algo-btn::before {
-        content: "";
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(
-          90deg,
-          transparent,
-          rgba(255, 255, 255, 0.2),
-          transparent
-        );
-        transition: left 0.5s;
-      }
-
-      .algo-btn:hover {
-        transform: translateX(5px);
-        background: rgba(255, 255, 255, 0.2);
-        border-color: rgba(255, 255, 255, 0.4);
-        box-shadow: 0 4px 20px rgba(240, 147, 251, 0.3);
-      }
-
-      .algo-btn:hover::before {
-        left: 100%;
-      }
-
-      .algo-btn.active {
-        background: linear-gradient(135deg, var(--primary), var(--secondary));
-        border-color: transparent;
-        box-shadow: 0 4px 20px rgba(102, 126, 234, 0.5);
-      }
-
-      /* Main content */
-      .main-content {
-        background: var(--glass);
-        backdrop-filter: blur(20px);
-        border: 1px solid var(--glass-border);
+      /* Sidebar tab buttons */
+      #sidebar .tab-btn {
+        background: linear-gradient(90deg, #c2edff 0%, #dfedff 100%);
+        border: none;
+        color: #264c61;
         border-radius: 20px;
-        padding: 2rem;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        font-size: 1.15rem;
+        font-family: var(--font-head);
+        font-weight: 700;
+        padding: 13px 35px;
+        margin: 0 25px 40px 25px;
+        cursor: pointer;
+        box-shadow: 0 0 24px #b4f2ff77;
+        transition: box-shadow 0.17s, color 0.16s, background 0.14s;
+      }
+
+      /* Tab button active/hover style */
+      #sidebar .tab-btn:hover,
+      #sidebar .tab-btn.selected {
+        background: linear-gradient(100deg, #d7faff 30%, #cef5ff 100%);
+        color: #235684;
+        box-shadow: var(--glass-shadow);
+      }
+
+      /* Topics list styling */
+      #topics {
+        width: 95%;
+        margin: 0 auto;
+        padding-left: 0;
+      }
+
+      /* Topic items */
+      #topics > li {
+        font-family: var(--font-menu);
+        font-size: 1.2rem;
+        text-align: left;
+        margin: 0 0 16px 0;
+        padding: 16px 28px;
+        cursor: pointer;
+        border-radius: 18px;
+        list-style-type: disc;
+        list-style-position: inside;
+        background: none;
+        transition: background 0.2s ease;
+        user-select: none;
+        position: relative;
+      }
+
+      /* Hover and selected */
+      #topics > li:hover,
+      #topics > li.selected {
+        background: rgba(255, 255, 255, 0.17);
+        color: #2a86aa;
+      }
+
+      /* Dropdown menus */
+      .dropdown > ul {
+        display: none;
+        margin: 0;
+        padding-left: 20px;
+        list-style-type: circle;
+      }
+      .dropdown.open > ul {
+        display: block;
+      }
+      .dropdown > ul > li {
+        padding-left: 12px;
+        margin-bottom: 6px;
+        font-weight: 500;
+        cursor: pointer;
+        border-radius: 14px;
+      }
+      .dropdown > ul > li:hover,
+      .dropdown > ul > li.selected {
+        background: rgba(255, 255, 255, 0.25);
+        color: #2d90c9;
+      }
+
+      /* Add arrow indicator for dropdown */
+      .dropdown::after {
+        content: "▼";
+        font-size: 0.7rem;
+        position: absolute;
+        right: 20px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #194868;
+        user-select: none;
+        transition: transform 0.3s ease;
+      }
+      .dropdown.open::after {
+        transform: translateY(-50%) rotate(180deg);
+      }
+
+      /* Main content area */
+      main#visualizer {
+        margin-left: 270px;
+        min-height: 100vh;
+        padding: 20px 40px 50px 40px;
       }
 
       /* Visualization canvas */
-      .viz-container {
-        background: rgba(255, 255, 255, 0.05);
-        border-radius: 15px;
-        padding: 2rem;
-        margin-bottom: 2rem;
-        min-height: 400px;
-        position: relative;
-        overflow: hidden;
-        border: 1px solid rgba(255, 255, 255, 0.1);
-      }
-
-      .viz-canvas {
+      #viz {
+        width: 760px;
+        height: 370px;
+        background: var(--glass-bg);
+        border-radius: 28px;
+        border: 2px solid var(--glass-border);
+        box-shadow: 0 4px 32px 0 rgba(163, 208, 255, 0.25);
+        backdrop-filter: blur(15px) saturate(160%);
         display: flex;
         align-items: flex-end;
         justify-content: center;
-        gap: 8px;
-        min-height: 350px;
-        position: relative;
+        margin-bottom: 40px;
       }
 
-      .array-bar {
+      /* Each bar container */
+      .bar-container {
         display: flex;
         flex-direction: column;
         align-items: center;
-        position: relative;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        margin: 0 7px;
       }
 
-      .bar {
-        width: 40px;
-        background: linear-gradient(180deg, var(--accent), var(--primary));
-        border-radius: 8px 8px 0 0;
-        position: relative;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-      }
-
-      .bar.comparing {
-        background: linear-gradient(180deg, var(--warning), #f59e0b);
-        animation: pulse 0.5s ease-in-out;
-        box-shadow: 0 0 30px rgba(251, 191, 36, 0.6);
-      }
-
-      .bar.swapping {
-        background: linear-gradient(180deg, var(--danger), #ef4444);
-        animation: swap-animation 0.5s ease-in-out;
-        box-shadow: 0 0 30px rgba(248, 113, 113, 0.6);
-      }
-
-      .bar.sorted {
-        background: linear-gradient(180deg, var(--success), #22c55e);
-        animation: sorted-animation 0.5s ease-in-out;
-        box-shadow: 0 0 30px rgba(74, 222, 128, 0.6);
-      }
-
-      @keyframes pulse {
-        0%,
-        100% {
-          transform: scale(1);
-        }
-        50% {
-          transform: scale(1.1);
-        }
-      }
-
-      @keyframes swap-animation {
-        0% {
-          transform: translateY(0) rotate(0);
-        }
-        50% {
-          transform: translateY(-20px) rotate(5deg);
-        }
-        100% {
-          transform: translateY(0) rotate(0);
-        }
-      }
-
-      @keyframes sorted-animation {
-        0% {
-          transform: scale(1) translateY(0);
-        }
-        50% {
-          transform: scale(1.2) translateY(-10px);
-        }
-        100% {
-          transform: scale(1) translateY(0);
-        }
-      }
-
-      .bar-value {
-        color: white;
-        font-weight: 600;
+      /* Bar label */
+      .array-value {
+        font-family: var(--font-head);
         font-size: 1.1rem;
-        margin-top: 0.5rem;
-        padding: 0.25rem 0.5rem;
-        background: rgba(255, 255, 255, 0.1);
-        border-radius: 5px;
-        backdrop-filter: blur(10px);
-        transition: all 0.3s;
-      }
-
-      .bar-value.highlight {
-        background: rgba(251, 191, 36, 0.3);
-        transform: scale(1.2);
-      }
-
-      /* Controls */
-      .controls {
-        display: flex;
-        gap: 1rem;
-        margin-bottom: 2rem;
-        flex-wrap: wrap;
-        align-items: center;
-      }
-
-      .control-btn {
-        padding: 0.75rem 1.5rem;
-        background: linear-gradient(135deg, var(--primary), var(--secondary));
-        border: none;
-        color: white;
-        border-radius: 10px;
-        cursor: pointer;
-        font-weight: 600;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        position: relative;
-        overflow: hidden;
-        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-      }
-
-      .control-btn::before {
-        content: "";
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        width: 0;
-        height: 0;
-        border-radius: 50%;
-        background: rgba(255, 255, 255, 0.3);
-        transform: translate(-50%, -50%);
-        transition: width 0.6s, height 0.6s;
-      }
-
-      .control-btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
-      }
-
-      .control-btn:active::before {
-        width: 300px;
-        height: 300px;
-      }
-
-      .control-btn:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-      }
-
-      .input-group {
-        display: flex;
-        gap: 0.5rem;
-        align-items: center;
-        flex: 1;
-        max-width: 400px;
-      }
-
-      .array-input {
-        flex: 1;
-        padding: 0.75rem 1rem;
-        background: rgba(255, 255, 255, 0.1);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        color: white;
-        border-radius: 10px;
-        font-size: 1rem;
-        transition: all 0.3s;
-      }
-
-      .array-input::placeholder {
-        color: rgba(255, 255, 255, 0.5);
-      }
-
-      .array-input:focus {
-        outline: none;
-        background: rgba(255, 255, 255, 0.15);
-        border-color: var(--accent);
-        box-shadow: 0 0 20px rgba(240, 147, 251, 0.3);
-      }
-
-      .speed-control {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        color: white;
-      }
-
-      .speed-slider {
-        width: 100px;
-        height: 6px;
-        background: rgba(255, 255, 255, 0.2);
-        border-radius: 3px;
-        outline: none;
-        -webkit-appearance: none;
-      }
-
-      .speed-slider::-webkit-slider-thumb {
-        -webkit-appearance: none;
-        width: 18px;
-        height: 18px;
-        background: linear-gradient(135deg, var(--accent), var(--primary));
-        border-radius: 50%;
-        cursor: pointer;
-        box-shadow: 0 2px 10px rgba(240, 147, 251, 0.5);
-      }
-
-      /* Info panel */
-      .info-panel {
-        background: rgba(255, 255, 255, 0.05);
-        border-radius: 15px;
-        padding: 1.5rem;
-        margin-top: 2rem;
-        border: 1px solid rgba(255, 255, 255, 0.1);
-      }
-
-      .info-title {
-        color: white;
-        font-size: 1.5rem;
-        margin-bottom: 1rem;
-        font-weight: 700;
-      }
-
-      .info-description {
-        color: rgba(255, 255, 255, 0.8);
-        line-height: 1.6;
-        margin-bottom: 1rem;
-      }
-
-      .complexity-table {
-        background: rgba(255, 255, 255, 0.05);
-        border-radius: 10px;
-        padding: 1rem;
-        margin-top: 1rem;
-      }
-
-      .complexity-row {
-        display: flex;
-        justify-content: space-between;
-        padding: 0.5rem 0;
-        color: rgba(255, 255, 255, 0.9);
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-      }
-
-      .complexity-row:last-child {
-        border-bottom: none;
-      }
-
-      .code-snippet {
-        background: rgba(0, 0, 0, 0.3);
-        border-radius: 10px;
-        padding: 1rem;
-        margin-top: 1rem;
-        color: #f0f0f0;
-        font-family: "Courier New", monospace;
-        font-size: 0.9rem;
-        overflow-x: auto;
-        border: 1px solid rgba(255, 255, 255, 0.1);
-      }
-
-      /* Status message */
-      .status-message {
+        margin-bottom: 8px;
+        text-shadow: 0 2px 8px #acdbf7;
+        letter-spacing: 1px;
+        min-width: 28px;
+        background: rgba(230, 250, 255, 0.5);
+        border-radius: 6px;
+        padding: 2px 7px;
         text-align: center;
-        color: white;
+        transition: background-color 0.3s, color 0.3s;
+      }
+
+      /* Bars */
+      .bar {
+        width: 28px;
+        border-radius: 9px;
+        background: linear-gradient(
+          130deg,
+          #abe7fe 0%,
+          #b5fdfa 70%,
+          #edfff8 100%
+        );
+        box-shadow: 0 2px 9px 0 rgba(123, 206, 234, 0.7);
+        transition: height 0.4s ease, background-color 0.3s ease;
+      }
+
+      /* Highlighted bars */
+      .highlight {
+        background: linear-gradient(120deg, #80ffd3 0%, #67f9e7 100%);
+        box-shadow: 0 0 22px #38ffdc;
+      }
+      .swap {
+        background: #ff8e94;
+        box-shadow: 0 0 22px #ff5f66;
+      }
+
+      /* Step info message */
+      #step-info {
+        font-family: var(--font-menu);
         font-size: 1.1rem;
-        margin-top: 1rem;
-        padding: 1rem;
-        background: rgba(255, 255, 255, 0.1);
-        border-radius: 10px;
-        backdrop-filter: blur(10px);
-        min-height: 50px;
+        color: #317ca6;
+        max-width: 580px;
+        margin: 0 auto 40px auto;
+        padding: 12px 26px;
+        border-radius: 22px;
+        background: rgba(227, 244, 255, 0.44);
+        box-shadow: 0 4px 12px #9edefdb7;
+        text-align: center;
+        min-height: 36px;
+        user-select: none;
+      }
+
+      /* Control panel */
+      #controls {
+        max-width: 720px;
+        margin: 0 auto 40px auto;
         display: flex;
+        justify-content: center;
+        gap: 24px;
+        align-items: center;
+        background: var(--glass-bg);
+        border-radius: 32px;
+        padding: 20px 36px;
+        box-shadow: 0 0 88px 2px #00bcd4ab;
+      }
+      #controls button {
+        background: linear-gradient(135deg, #a0e2ff 0%, #7ee7f7 90%);
+        border: none;
+        border-radius: 14px;
+        width: 48px;
+        height: 48px;
+        cursor: pointer;
+        user-select: none;
+        font-size: 1.8rem;
+        color: #055473;
+        transition: box-shadow 0.3s ease;
+        box-shadow: 0 0 8px 1px #4aeaff9a;
+      }
+      #controls button:hover {
+        box-shadow: 0 0 20px 4px #4aeaffda;
+      }
+      #controls input {
+        width: 360px;
+        font-size: 1.1rem;
+        padding: 12px 18px;
+        border-radius: 22px;
+        border: 2px solid #a0d9fd;
+        background: rgba(255, 255, 255, 0.6);
+        color: #315f74;
+        font-family: var(--font-menu);
+        user-select: all;
+      }
+
+      /* View Algo button */
+      #viewAlgoBtn {
+        background: linear-gradient(130deg, #95f6e1 0%, #68e3d6 100%);
+        border: none;
+        color: #0e605b;
+        font-weight: 700;
+        font-family: var(--font-head);
+        border-radius: 32px;
+        cursor: pointer;
+        padding: 14px 38px;
+        font-size: 1.15rem;
+        box-shadow: 0 0 28px #4aeaffbb;
+        transition: background-color 0.4s ease;
+      }
+      #viewAlgoBtn:hover {
+        background: linear-gradient(130deg, #68e3d6 0%, #4ac0bd 100%);
+      }
+
+      /* Information panel */
+      #algo-info {
+        max-width: 740px;
+        margin: 0 auto;
+        padding: 20px 24px;
+        background: var(--glass-bg);
+        border-radius: 28px;
+        box-shadow: 0 0 32px #58dff3aa;
+        color: #16677e;
+        font-family: var(--font-menu);
+      }
+      #algo-info h2 {
+        font-family: var(--font-head);
+        text-align: center;
+        margin-bottom: 16px;
+      }
+      #algo-info pre {
+        border-radius: 14px;
+        background: rgba(255, 255, 255, 0.3);
+        box-shadow: inset 0 0 8px #95f4ffaa;
+        padding: 22px 28px;
+        font-family: monospace;
+        overflow-x: auto;
+      }
+
+      /* Modal styles */
+      .algo-modal {
+        position: fixed;
+        inset: 0;
+        background: rgba(200, 220, 255, 0.3);
+        display: none;
         align-items: center;
         justify-content: center;
-        transition: all 0.3s;
+        backdrop-filter: blur(24px);
+        z-index: 10;
       }
-
-      .status-message.success {
-        background: rgba(74, 222, 128, 0.2);
-        border: 1px solid rgba(74, 222, 128, 0.3);
+      .algo-modal.show {
+        display: flex;
       }
-
-      .status-message.warning {
-        background: rgba(251, 191, 36, 0.2);
-        border: 1px solid rgba(251, 191, 36, 0.3);
+      .algo-modal .modal-content {
+        background: linear-gradient(120deg, #dbf8fa 70%, #f7fcff 100%);
+        border-radius: 40px;
+        box-shadow: 0 0 40px #3ac7fc9c;
+        padding: 32px 42px;
+        max-width: 480px;
+        width: 90%;
+        position: relative;
+        font-family: var(--font-menu);
+        color: #1d4f70;
+      }
+      .algo-modal .modal-content h2 {
+        font-family: var(--font-head);
+        font-size: 2.4rem;
+        text-align: center;
+        margin-bottom: 24px;
+        text-shadow: 0 0 24px #53d9fc9a;
+      }
+      .algo-modal .modal-content pre {
+        background: rgba(255, 255, 255, 0.6);
+        border-radius: 18px;
+        padding: 18px 24px;
+        font-size: 1rem;
+        overflow-x: auto;
+      }
+      .algo-modal .modal-content p,
+      .algo-modal .modal-content ul {
+        font-size: 1.05rem;
+        line-height: 1.4;
+      }
+      .algo-modal .modal-content ul {
+        padding-left: 24px;
+        color: #0e5864;
+      }
+      .algo-modal .modal-content ul li {
+        margin-bottom: 8px;
+      }
+      .algo-modal .modal-close {
+        position: absolute;
+        top: 10px;
+        right: 14px;
+        width: 38px;
+        height: 38px;
+        font-weight: 900;
+        font-size: 1.8rem;
+        color: #08759c;
+        border-radius: 100%;
+        background: #d2f0ff;
+        cursor: pointer;
+        box-shadow: 0 0 18px #4fc9ff6f;
+        user-select: none;
+        border: none;
+      }
+      .algo-modal .modal-close:hover {
+        background: #98e1ff;
+        color: #01495b;
+        box-shadow: 0 0 26px #47ceff9c;
       }
 
       /* Responsive */
-      @media (max-width: 768px) {
-        .container {
-          grid-template-columns: 1fr;
+      @media (max-width: 840px) {
+        #sidebar {
+          width: 200px;
         }
-
-        .sidebar {
-          position: static;
+        main#visualizer {
+          margin-left: 200px;
         }
-
-        .controls {
-          flex-direction: column;
-          align-items: stretch;
-        }
-
-        .input-group {
-          max-width: 100%;
+        #viz {
+          width: 90vw;
+          height: 300px;
         }
       }
     </style>
   </head>
   <body>
-    <div class="bg-animation"></div>
+    <div id="main-bg"></div>
 
-    <!-- Floating particles -->
-    <div id="particles"></div>
+    <!-- Sidebar -->
+    <nav id="sidebar">
+      <h2>AlgoVisual</h2>
+      <button class="tab-btn" id="algoTab">Algorithm Viewer</button>
+      <ul id="topics">
+        <li class="dropdown">
+          Sorting
+          <ul>
+            <li id="bubbleSortBtn">Bubble Sort</li>
+            <li id="mergeSortBtn">Merge Sort</li>
+            <li id="quickSortBtn">Quick Sort</li>
+          </ul>
+        </li>
+        <li class="dropdown">
+          Searching
+          <ul>
+            <li id="linearSearchBtn">Linear Search</li>
+            <li id="binarySearchBtn">Binary Search</li>
+          </ul>
+        </li>
+        <li class="dropdown">
+          Trees
+          <ul>
+            <li id="linearTreeBtn">Linear Tree</li>
+            <li id="binaryTreeBtn">Binary Tree</li>
+          </ul>
+        </li>
+        <li id="dijkstraBtn">Dijkstra's</li>
+      </ul>
+    </nav>
 
-    <header class="header">
-      <div class="logo">
-        <div class="logo-icon">📊</div>
-        AlgoViz Pro
-      </div>
-      <div class="speed-control">
-        <span>Speed:</span>
+    <!-- Main Visualizer -->
+    <main id="visualizer">
+      <div id="viz"></div>
+      <div id="step-info"></div>
+
+      <div id="controls">
+        <button title="Start" aria-label="Start Animation">&#9654;</button>
+        <button title="Pause" aria-label="Pause Animation">
+          &#10073;&#10073;
+        </button>
+        <button title="Step" aria-label="Step Animation">&#9654;&#9654;</button>
+        <button title="Reset" aria-label="Reset Animation">&#8635;</button>
+
         <input
-          type="range"
-          class="speed-slider"
-          id="speedSlider"
-          min="100"
-          max="2000"
-          value="1000"
+          id="user-input"
+          aria-label="Input Array"
+          type="text"
+          placeholder="Enter numbers separated by commas (e.g., 3,5,1,9)"
         />
-        <span id="speedValue">1s</span>
+
+        <button id="viewAlgoBtn" aria-label="View Algorithm Details">
+          View Algo
+        </button>
       </div>
-    </header>
+    </main>
 
-    <div class="container">
-      <aside class="sidebar">
-        <h3>Algorithms</h3>
+    <!-- Info Panel -->
+    <aside id="algo-info" aria-label="Algorithm Information" hidden>
+      <h2 id="algo-title">Algorithm Title</h2>
+      <pre id="algo-code" aria-label="Algorithm Code"></pre>
+      <p id="algo-desc">Algorithm description goes here.</p>
+    </aside>
 
-        <div class="algo-category">
-          <div class="category-title">Sorting</div>
-          <button class="algo-btn active" data-algo="bubble">
-            Bubble Sort
-          </button>
-          <button class="algo-btn" data-algo="selection">Selection Sort</button>
-          <button class="algo-btn" data-algo="insertion">Insertion Sort</button>
-          <button class="algo-btn" data-algo="merge">Merge Sort</button>
-          <button class="algo-btn" data-algo="quick">Quick Sort</button>
-        </div>
-
-        <div class="algo-category">
-          <div class="category-title">Searching</div>
-          <button class="algo-btn" data-algo="linear">Linear Search</button>
-          <button class="algo-btn" data-algo="binary">Binary Search</button>
-        </div>
-      </aside>
-
-      <main class="main-content">
-        <div class="controls">
-          <div class="input-group">
-            <input
-              type="text"
-              class="array-input"
-              id="arrayInput"
-              placeholder="Enter numbers (e.g., 64,34,25,12,22)"
-            />
-            <button class="control-btn" id="generateBtn">Random</button>
-          </div>
-          <button class="control-btn" id="startBtn">▶ Start</button>
-          <button class="control-btn" id="pauseBtn">⏸ Pause</button>
-          <button class="control-btn" id="resetBtn">↺ Reset</button>
-        </div>
-
-        <div class="viz-container">
-          <div class="viz-canvas" id="vizCanvas"></div>
-          <div class="status-message" id="statusMessage">
-            Ready to visualize
-          </div>
-        </div>
-
-        <div class="info-panel">
-          <h2 class="info-title" id="algoTitle">Bubble Sort</h2>
-          <p class="info-description" id="algoDescription">
-            Bubble Sort is a simple sorting algorithm that repeatedly steps
-            through the list, compares adjacent elements and swaps them if they
-            are in the wrong order.
-          </p>
-
-          <div class="complexity-table">
-            <div class="complexity-row">
-              <span>Time Complexity (Best):</span>
-              <span id="timeBest">O(n)</span>
-            </div>
-            <div class="complexity-row">
-              <span>Time Complexity (Average):</span>
-              <span id="timeAvg">O(n²)</span>
-            </div>
-            <div class="complexity-row">
-              <span>Time Complexity (Worst):</span>
-              <span id="timeWorst">O(n²)</span>
-            </div>
-            <div class="complexity-row">
-              <span>Space Complexity:</span>
-              <span id="space">O(1)</span>
-            </div>
-          </div>
-
-          <pre class="code-snippet" id="codeSnippet">
-function bubbleSort(arr) {
-    for (let i = 0; i < arr.length - 1; i++) {
-        for (let j = 0; j < arr.length - i - 1; j++) {
-            if (arr[j] > arr[j + 1]) {
-                // Swap elements
-                [arr[j], arr[j + 1]] = [arr[j + 1], arr[j]];
-            }
-        }
-    }
-    return arr;
-}</pre
-          >
-        </div>
-      </main>
+    <!-- Modal for Algorithm Details -->
+    <div
+      class="algo-modal"
+      id="algoModal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="algoModalTitle"
+      aria-describedby="algoModalDesc"
+      tabindex="-1"
+    >
+      <div class="modal-content">
+        <button class="modal-close" aria-label="Close">&times;</button>
+        <h2 id="algoModalTitle">Algorithm Info</h2>
+        <div id="algoModalDesc"></div>
+      </div>
     </div>
 
     <script>
-      // Global variables
-      let array = [64, 34, 25, 12, 22, 11, 90];
-      let currentAlgorithm = "bubble";
-      let animationSpeed = 1000;
-      let isAnimating = false;
-      let isPaused = false;
-      let animationTimeouts = [];
+      // DOM elements
+      const viz = document.getElementById("viz");
+      const stepInfo = document.getElementById("step-info");
+      const userInput = document.getElementById("user-input");
+      const controls = document.querySelectorAll("#controls button");
+      const startBtn = controls[0];
+      const pauseBtn = controls[1];
+      const stepBtn = controls[2];
+      const resetBtn = controls[3];
+      const viewAlgoBtn = document.getElementById("viewAlgoBtn");
+      const modal = document.getElementById("algoModal");
+      const modalClose = modal.querySelector(".modal-close");
+      const algoModalTitle = document.getElementById("algoModalTitle");
+      const algoModalDesc = document.getElementById("algoModalDesc");
+      const algoTitle = document.getElementById("algo-title");
+      const algoCode = document.getElementById("algo-code");
+      const algoDesc = document.getElementById("algo-desc");
 
-      // Algorithm information
-      const algorithmInfo = {
-        bubble: {
-          title: "Bubble Sort",
-          description:
-            "Bubble Sort is a simple sorting algorithm that repeatedly steps through the list, compares adjacent elements and swaps them if they are in the wrong order.",
-          timeBest: "O(n)",
-          timeAvg: "O(n²)",
-          timeWorst: "O(n²)",
-          space: "O(1)",
-          code: `function bubbleSort(arr) {
-    for (let i = 0; i < arr.length - 1; i++) {
-        for (let j = 0; j < arr.length - i - 1; j++) {
-            if (arr[j] > arr[j + 1]) {
-                // Swap elements
-                [arr[j], arr[j + 1]] = [arr[j + 1], arr[j]];
-            }
-        }
-    }
-    return arr;
-}`,
-        },
-        selection: {
-          title: "Selection Sort",
-          description:
-            "Selection Sort divides the input list into a sorted and an unsorted region, and repeatedly selects the smallest element from the unsorted region to add to the sorted region.",
-          timeBest: "O(n²)",
-          timeAvg: "O(n²)",
-          timeWorst: "O(n²)",
-          space: "O(1)",
-          code: `function selectionSort(arr) {
-    for (let i = 0; i < arr.length - 1; i++) {
-        let minIdx = i;
-        for (let j = i + 1; j < arr.length; j++) {
-            if (arr[j] < arr[minIdx]) {
-                minIdx = j;
-            }
-        }
-        if (minIdx !== i) {
-            [arr[i], arr[minIdx]] = [arr[minIdx], arr[i]];
-        }
-    }
-    return arr;
-}`,
-        },
-        insertion: {
-          title: "Insertion Sort",
-          description:
-            "Insertion Sort builds the final sorted array one item at a time. It is much less efficient on large lists than more advanced algorithms.",
-          timeBest: "O(n)",
-          timeAvg: "O(n²)",
-          timeWorst: "O(n²)",
-          space: "O(1)",
-          code: `function insertionSort(arr) {
-    for (let i = 1; i < arr.length; i++) {
-        let key = arr[i];
-        let j = i - 1;
-        while (j >= 0 && arr[j] > key) {
-            arr[j + 1] = arr[j];
-            j--;
-        }
-        arr[j + 1] = key;
-    }
-    return arr;
-}`,
-        },
-        merge: {
-          title: "Merge Sort",
-          description:
-            "Merge Sort is a divide-and-conquer algorithm that divides the list into smaller sublists, sorts them, and then merges them back together.",
-          timeBest: "O(n log n)",
-          timeAvg: "O(n log n)",
-          timeWorst: "O(n log n)",
-          space: "O(n)",
-          code: `function mergeSort(arr) {
-    if (arr.length <= 1) return arr;
-    
-    const mid = Math.floor(arr.length / 2);
-    const left = mergeSort(arr.slice(0, mid));
-    const right = mergeSort(arr.slice(mid));
-    
-    return merge(left, right);
-}
+      // State variables
+      let currentAlgorithm = null;
+      let arrayData = [];
+      let bubbleState = null;
+      let mergeState = null;
+      let timer = null;
 
-function merge(left, right) {
-    let result = [];
-    let i = 0, j = 0;
-    
-    while (i < left.length && j < right.length) {
-        if (left[i] < right[j]) {
-            result.push(left[i++]);
-        } else {
-            result.push(right[j++]);
-        }
-    }
-    
-    return result.concat(left.slice(i)).concat(right.slice(j));
-}`,
-        },
-        quick: {
-          title: "Quick Sort",
-          description:
-            "Quick Sort is a divide-and-conquer algorithm that picks a pivot element and partitions the array around it.",
-          timeBest: "O(n log n)",
-          timeAvg: "O(n log n)",
-          timeWorst: "O(n²)",
-          space: "O(log n)",
-          code: `function quickSort(arr, low = 0, high = arr.length - 1) {
-    if (low < high) {
-        const pivotIndex = partition(arr, low, high);
-        quickSort(arr, low, pivotIndex - 1);
-        quickSort(arr, pivotIndex + 1, high);
-    }
-    return arr;
-}
-
-function partition(arr, low, high) {
-    const pivot = arr[high];
-    let i = low - 1;
-    
-    for (let j = low; j < high; j++) {
-        if (arr[j] < pivot) {
-            i++;
-            [arr[i], arr[j]] = [arr[j], arr[i]];
-        }
-    }
-    
-    [arr[i + 1], arr[high]] = [arr[high], arr[i + 1]];
-    return i + 1;
-}`,
-        },
-        linear: {
-          title: "Linear Search",
-          description:
-            "Linear Search sequentially checks each element of the list until a match is found or the whole list has been searched.",
-          timeBest: "O(1)",
-          timeAvg: "O(n)",
-          timeWorst: "O(n)",
-          space: "O(1)",
-          code: `function linearSearch(arr, target) {
-    for (let i = 0; i < arr.length; i++) {
-        if (arr[i] === target) {
-            return i;
-        }
-    }
-    return -1;
-}`,
-        },
-        binary: {
-          title: "Binary Search",
-          description:
-            "Binary Search is a search algorithm that finds the position of a target value within a sorted array by repeatedly dividing the search interval in half.",
-          timeBest: "O(1)",
-          timeAvg: "O(log n)",
-          timeWorst: "O(log n)",
-          space: "O(1)",
-          code: `function binarySearch(arr, target) {
-    let left = 0;
-    let right = arr.length - 1;
-    
-    while (left <= right) {
-        const mid = Math.floor((left + right) / 2);
-        
-        if (arr[mid] === target) {
-            return mid;
-        } else if (arr[mid] < target) {
-            left = mid + 1;
-        } else {
-            right = mid - 1;
-        }
-    }
-    
-    return -1;
-}`,
-        },
-      };
-
-      // Initialize
-      document.addEventListener("DOMContentLoaded", () => {
-        createParticles();
-        renderArray();
-        updateAlgorithmInfo();
-
-        // Event listeners
-        document
-          .getElementById("startBtn")
-          .addEventListener("click", startAnimation);
-        document
-          .getElementById("pauseBtn")
-          .addEventListener("click", pauseAnimation);
-        document
-          .getElementById("resetBtn")
-          .addEventListener("click", resetAnimation);
-        document
-          .getElementById("generateBtn")
-          .addEventListener("click", generateRandomArray);
-        document
-          .getElementById("arrayInput")
-          .addEventListener("change", handleArrayInput);
-        document
-          .getElementById("speedSlider")
-          .addEventListener("input", handleSpeedChange);
-
-        // Algorithm buttons
-        document.querySelectorAll(".algo-btn").forEach((btn) => {
-          btn.addEventListener("click", (e) => {
-            document
-              .querySelectorAll(".algo-btn")
-              .forEach((b) => b.classList.remove("active"));
-            e.target.classList.add("active");
-            currentAlgorithm = e.target.dataset.algo;
-            resetAnimation();
-            updateAlgorithmInfo();
-          });
-        });
-      });
-
-      // Create floating particles
-      function createParticles() {
-        const particlesContainer = document.getElementById("particles");
-        for (let i = 0; i < 20; i++) {
-          const particle = document.createElement("div");
-          particle.style.left = Math.random() * 100 + "%";
-          particle.style.width = Math.random() * 10 + 5 + "px";
-          particle.style.height = particle.style.width;
-          particle.style.background = `radial-gradient(circle, rgba(255, 255, 255, ${
-            Math.random() * 0.5 + 0.3
-          }), transparent)`;
-          particle.style.animationDelay = Math.random() * 20 + "s";
-          particle.style.animationDuration = Math.random() * 20 + 20 + "s";
-          particlesContainer.appendChild(particle);
+      // Utility functions
+      function clearTimer() {
+        if (timer) {
+          clearTimeout(timer);
+          timer = null;
         }
       }
 
-      // Render array
-      function renderArray(comparing = [], swapping = [], sorted = []) {
-        const canvas = document.getElementById("vizCanvas");
-        canvas.innerHTML = "";
+      function resetVisualization() {
+        clearTimer();
+        bubbleState = null;
+        mergeState = null;
+        drawArray(arrayData);
+        updateStepInfo("Visualization reset. Ready to start.");
+      }
 
-        const maxValue = Math.max(...array);
+      function drawArray(arr, highlights = [], swaps = []) {
+        viz.innerHTML = "";
+        if (arr.length === 0) {
+          viz.textContent = "Enter an array above.";
+          viz.style.color = "#558";
+          viz.style.fontSize = "1.2rem";
+          viz.style.textAlign = "center";
+          viz.style.paddingTop = "150px";
+          return;
+        }
+        const maxVal = Math.max(...arr, 1);
+        viz.style.display = "flex";
+        viz.style.justifyContent = "center";
+        viz.style.alignItems = "flex-end";
+        viz.style.color = "";
+        viz.style.fontSize = "";
+        viz.style.paddingTop = "";
+        for (let i = 0; i < arr.length; i++) {
+          const container = document.createElement("div");
+          container.className = "bar-container";
 
-        array.forEach((value, index) => {
-          const barContainer = document.createElement("div");
-          barContainer.className = "array-bar";
+          const label = document.createElement("span");
+          label.className = "array-value";
+          label.textContent = arr[i];
+          if (swaps.includes(i)) label.classList.add("swap");
+          else if (highlights.includes(i)) label.classList.add("highlight");
 
           const bar = document.createElement("div");
           bar.className = "bar";
-          const height = (value / maxValue) * 300;
-          bar.style.height = height + "px";
+          bar.style.height = (arr[i] / maxVal) * 90 + "%";
+          if (swaps.includes(i)) bar.classList.add("swap");
+          else if (highlights.includes(i)) bar.classList.add("highlight");
 
-          if (sorted.includes(index)) {
-            bar.classList.add("sorted");
-          } else if (swapping.includes(index)) {
-            bar.classList.add("swapping");
-          } else if (comparing.includes(index)) {
-            bar.classList.add("comparing");
-          }
+          container.appendChild(label);
+          container.appendChild(bar);
+          viz.appendChild(container);
+        }
+      }
 
-          const valueLabel = document.createElement("div");
-          valueLabel.className = "bar-value";
-          valueLabel.textContent = value;
-          if (comparing.includes(index) || swapping.includes(index)) {
-            valueLabel.classList.add("highlight");
-          }
+      function updateStepInfo(text) {
+        stepInfo.textContent = text;
+      }
 
-          barContainer.appendChild(bar);
-          barContainer.appendChild(valueLabel);
-          canvas.appendChild(barContainer);
+      // Bubble Sort animation logic
+      async function animateSwap(el1, el2) {
+        return new Promise((resolve) => {
+          const rect1 = el1.getBoundingClientRect();
+          const rect2 = el2.getBoundingClientRect();
+          const dist = rect2.left - rect1.left;
+
+          el1.style.transition = "transform 0.4s ease";
+          el2.style.transition = "transform 0.4s ease";
+          el1.style.transform = `translateX(${dist}px)`;
+          el2.style.transform = `translateX(${-dist}px)`;
+
+          setTimeout(() => {
+            el1.style.transition = "";
+            el2.style.transition = "";
+            el1.style.transform = "";
+            el2.style.transform = "";
+            const p = el1.parentNode;
+            if (rect1.left < rect2.left) {
+              p.insertBefore(el2, el1);
+            } else {
+              p.insertBefore(el1, el2);
+            }
+            resolve();
+          }, 400);
         });
       }
 
-      // Update algorithm information
-      function updateAlgorithmInfo() {
-        const info = algorithmInfo[currentAlgorithm];
-        document.getElementById("algoTitle").textContent = info.title;
-        document.getElementById("algoDescription").textContent =
-          info.description;
-        document.getElementById("timeBest").textContent = info.timeBest;
-        document.getElementById("timeAvg").textContent = info.timeAvg;
-        document.getElementById("timeWorst").textContent = info.timeWorst;
-        document.getElementById("space").textContent = info.space;
-        document.getElementById("codeSnippet").textContent = info.code;
+      function startBubbleSort(stepMode = false) {
+        if (arrayData.length < 2) return;
+        bubbleState = {
+          arr: arrayData.slice(),
+          i: 0,
+          j: 0,
+          n: arrayData.length,
+          swapped: false,
+          stepMode,
+        };
+        clearTimer();
+        if (stepMode) bubbleSortStep();
+        else timer = setInterval(bubbleSortStep, 900);
       }
 
-      // Handle array input
-      function handleArrayInput(e) {
-        const input = e.target.value.trim();
-        if (input) {
-          const nums = input
-            .split(",")
-            .map((n) => parseInt(n.trim()))
-            .filter((n) => !isNaN(n));
-          if (nums.length > 0) {
-            array = nums.slice(0, 15); // Limit to 15 elements for visualization
-            resetAnimation();
-          }
-        }
-      }
-
-      // Generate random array
-      function generateRandomArray() {
-        const size = Math.floor(Math.random() * 8) + 8; // 8-15 elements
-        array = Array.from(
-          { length: size },
-          () => Math.floor(Math.random() * 99) + 1
-        );
-        document.getElementById("arrayInput").value = array.join(", ");
-        resetAnimation();
-      }
-
-      // Handle speed change
-      function handleSpeedChange(e) {
-        animationSpeed = 2100 - e.target.value; // Inverse for intuitive control
-        document.getElementById("speedValue").textContent =
-          (animationSpeed / 1000).toFixed(1) + "s";
-      }
-
-      // Animation controls
-      function startAnimation() {
-        if (isAnimating) return;
-
-        isAnimating = true;
-        isPaused = false;
-        document.getElementById("startBtn").disabled = true;
-        document.getElementById("statusMessage").textContent = "Sorting...";
-        document.getElementById("statusMessage").className =
-          "status-message warning";
-
-        switch (currentAlgorithm) {
-          case "bubble":
-            bubbleSort();
-            break;
-          case "selection":
-            selectionSort();
-            break;
-          case "insertion":
-            insertionSort();
-            break;
-          case "merge":
-            mergeSortAnimation();
-            break;
-          case "quick":
-            quickSortAnimation();
-            break;
-          case "linear":
-          case "binary":
-            searchAnimation();
-            break;
-        }
-      }
-
-      function pauseAnimation() {
-        isPaused = !isPaused;
-        document.getElementById("pauseBtn").textContent = isPaused
-          ? "▶ Resume"
-          : "⏸ Pause";
-      }
-
-      function resetAnimation() {
-        isAnimating = false;
-        isPaused = false;
-        animationTimeouts.forEach((timeout) => clearTimeout(timeout));
-        animationTimeouts = [];
-        document.getElementById("startBtn").disabled = false;
-        document.getElementById("pauseBtn").textContent = "⏸ Pause";
-        renderArray();
-        document.getElementById("statusMessage").textContent =
-          "Ready to visualize";
-        document.getElementById("statusMessage").className = "status-message";
-      }
-
-      // Bubble Sort Animation
-      async function bubbleSort() {
-        const arr = [...array];
-        const n = arr.length;
-        let sorted = [];
-
-        for (let i = 0; i < n - 1; i++) {
-          for (let j = 0; j < n - i - 1; j++) {
-            if (!isAnimating) return;
-            while (isPaused) {
-              await sleep(100);
-            }
-
-            renderArray([j, j + 1], [], sorted);
-            await sleep(animationSpeed);
-
-            if (arr[j] > arr[j + 1]) {
-              [arr[j], arr[j + 1]] = [arr[j + 1], arr[j]];
-              array = [...arr];
-              renderArray([], [j, j + 1], sorted);
-              await sleep(animationSpeed);
-            }
-          }
-          sorted.push(n - i - 1);
-        }
-        sorted.push(0);
-
-        finishAnimation(sorted);
-      }
-
-      // Selection Sort Animation
-      async function selectionSort() {
-        const arr = [...array];
-        const n = arr.length;
-        let sorted = [];
-
-        for (let i = 0; i < n - 1; i++) {
-          let minIdx = i;
-
-          for (let j = i + 1; j < n; j++) {
-            if (!isAnimating) return;
-            while (isPaused) {
-              await sleep(100);
-            }
-
-            renderArray([minIdx, j], [], sorted);
-            await sleep(animationSpeed);
-
-            if (arr[j] < arr[minIdx]) {
-              minIdx = j;
-            }
-          }
-
-          if (minIdx !== i) {
-            [arr[i], arr[minIdx]] = [arr[minIdx], arr[i]];
-            array = [...arr];
-            renderArray([], [i, minIdx], sorted);
-            await sleep(animationSpeed);
-          }
-
-          sorted.push(i);
-        }
-        sorted.push(n - 1);
-
-        finishAnimation(sorted);
-      }
-
-      // Insertion Sort Animation
-      async function insertionSort() {
-        const arr = [...array];
-        const n = arr.length;
-        let sorted = [0];
-
-        for (let i = 1; i < n; i++) {
-          let key = arr[i];
-          let j = i - 1;
-
-          while (j >= 0 && arr[j] > key) {
-            if (!isAnimating) return;
-            while (isPaused) {
-              await sleep(100);
-            }
-
-            renderArray([j, j + 1], [], sorted);
-            await sleep(animationSpeed);
-
-            arr[j + 1] = arr[j];
-            array = [...arr];
-            renderArray([], [j, j + 1], sorted);
-            await sleep(animationSpeed);
-
-            j--;
-          }
-
-          arr[j + 1] = key;
-          array = [...arr];
-          sorted.push(i);
-          renderArray([], [], sorted);
-          await sleep(animationSpeed);
-        }
-
-        finishAnimation(Array.from({ length: n }, (_, i) => i));
-      }
-
-      // Merge Sort Animation (simplified)
-      async function mergeSortAnimation() {
-        // For simplicity, we'll show a basic visualization
-        const arr = [...array];
-        const n = arr.length;
-
-        // Simulate merge sort with visual feedback
-        for (let size = 1; size < n; size *= 2) {
-          for (let start = 0; start < n - 1; start += 2 * size) {
-            if (!isAnimating) return;
-            while (isPaused) {
-              await sleep(100);
-            }
-
-            const mid = Math.min(start + size - 1, n - 1);
-            const end = Math.min(start + 2 * size - 1, n - 1);
-
-            // Highlight the subarrays being merged
-            const comparing = [];
-            for (let i = start; i <= end; i++) {
-              comparing.push(i);
-            }
-            renderArray(comparing, [], []);
-            await sleep(animationSpeed);
-
-            // Merge the subarrays
-            merge(arr, start, mid, end);
-            array = [...arr];
-            renderArray([], comparing, []);
-            await sleep(animationSpeed);
-          }
-        }
-
-        finishAnimation(Array.from({ length: n }, (_, i) => i));
-      }
-
-      function merge(arr, left, mid, right) {
-        const leftArr = arr.slice(left, mid + 1);
-        const rightArr = arr.slice(mid + 1, right + 1);
-
-        let i = 0,
-          j = 0,
-          k = left;
-
-        while (i < leftArr.length && j < rightArr.length) {
-          if (leftArr[i] <= rightArr[j]) {
-            arr[k++] = leftArr[i++];
-          } else {
-            arr[k++] = rightArr[j++];
-          }
-        }
-
-        while (i < leftArr.length) {
-          arr[k++] = leftArr[i++];
-        }
-
-        while (j < rightArr.length) {
-          arr[k++] = rightArr[j++];
-        }
-      }
-
-      // Quick Sort Animation (simplified)
-      async function quickSortAnimation() {
-        const arr = [...array];
-        await quickSortHelper(arr, 0, arr.length - 1);
-        finishAnimation(Array.from({ length: arr.length }, (_, i) => i));
-      }
-
-      async function quickSortHelper(arr, low, high) {
-        if (low < high) {
-          if (!isAnimating) return;
-          while (isPaused) {
-            await sleep(100);
-          }
-
-          const pivotIndex = await partition(arr, low, high);
-          await quickSortHelper(arr, low, pivotIndex - 1);
-          await quickSortHelper(arr, pivotIndex + 1, high);
-        }
-      }
-
-      async function partition(arr, low, high) {
-        const pivot = arr[high];
-        let i = low - 1;
-
-        renderArray([high], [], []);
-        await sleep(animationSpeed);
-
-        for (let j = low; j < high; j++) {
-          if (!isAnimating) return i + 1;
-          while (isPaused) {
-            await sleep(100);
-          }
-
-          renderArray([j, high], [], []);
-          await sleep(animationSpeed / 2);
-
-          if (arr[j] < pivot) {
-            i++;
-            [arr[i], arr[j]] = [arr[j], arr[i]];
-            array = [...arr];
-            renderArray([], [i, j], []);
-            await sleep(animationSpeed);
-          }
-        }
-
-        [arr[i + 1], arr[high]] = [arr[high], arr[i + 1]];
-        array = [...arr];
-        renderArray([], [i + 1, high], []);
-        await sleep(animationSpeed);
-
-        return i + 1;
-      }
-
-      // Search Animation
-      async function searchAnimation() {
-        const target = prompt("Enter a number to search:");
-        if (!target) return;
-
-        const targetNum = parseInt(target);
-        if (isNaN(targetNum)) {
-          alert("Please enter a valid number");
+      async function bubbleSortStep() {
+        if (!bubbleState) return;
+        let s = bubbleState;
+        if (s.i >= s.n - 1) {
+          clearTimer();
+          drawArray(s.arr, [], [...Array(s.n).keys()]);
+          updateStepInfo("Bubble Sort Completed!");
           return;
         }
-
-        document.getElementById(
-          "statusMessage"
-        ).textContent = `Searching for ${targetNum}...`;
-
-        if (currentAlgorithm === "binary") {
-          // Sort array first for binary search
-          array.sort((a, b) => a - b);
-          renderArray();
-          await sleep(1000);
-        }
-
-        const index =
-          currentAlgorithm === "linear"
-            ? await linearSearch(targetNum)
-            : await binarySearch(targetNum);
-
-        if (index !== -1) {
-          renderArray([], [], [index]);
-          document.getElementById(
-            "statusMessage"
-          ).textContent = `Found ${targetNum} at index ${index}!`;
-          document.getElementById("statusMessage").className =
-            "status-message success";
+        if (s.j < s.n - 1 - s.i) {
+          const bars = viz.querySelectorAll(".bar-container");
+          const el1 = bars[s.j];
+          const el2 = bars[s.j + 1];
+          let swappedNow = false;
+          if (s.arr[s.j] > s.arr[s.j + 1]) {
+            swappedNow = true;
+            await animateSwap(el1, el2);
+            [s.arr[s.j], s.arr[s.j + 1]] = [s.arr[s.j + 1], s.arr[s.j]];
+            s.swapped = true;
+          }
+          drawArray(s.arr, [s.j, s.j + 1], swappedNow ? [s.j, s.j + 1] : []);
+          updateStepInfo(
+            swappedNow
+              ? `Swapping ${s.arr[s.j]} and ${s.arr[s.j + 1]}`
+              : `Comparing ${s.arr[s.j]} and ${s.arr[s.j + 1]}`
+          );
+          s.j++;
+          if (s.stepMode) return;
         } else {
-          document.getElementById(
-            "statusMessage"
-          ).textContent = `${targetNum} not found in the array`;
-          document.getElementById("statusMessage").className = "status-message";
+          if (!s.swapped) {
+            clearTimer();
+            drawArray(s.arr, [], [...Array(s.n).keys()]);
+            updateStepInfo("Bubble Sort Completed!");
+            return;
+          }
+          s.j = 0;
+          s.i++;
+          s.swapped = false;
         }
-
-        isAnimating = false;
-        document.getElementById("startBtn").disabled = false;
       }
 
-      async function linearSearch(target) {
-        for (let i = 0; i < array.length; i++) {
-          if (!isAnimating) return -1;
-          while (isPaused) {
-            await sleep(100);
-          }
-
-          renderArray([i], [], []);
-          await sleep(animationSpeed);
-
-          if (array[i] === target) {
-            return i;
-          }
+      // Merge Sort animation logic
+      function startMergeSort(stepMode = false) {
+        if (arrayData.length < 2) return;
+        mergeState = {
+          arr: arrayData.slice(),
+          displayArr: arrayData.slice(),
+          actions: [],
+          currentStep: 0,
+          highlights: [],
+          stepMode,
+        };
+        clearTimer();
+        mergeState.actions = [];
+        generateMergeActions(0, mergeState.arr.length - 1, mergeState.actions);
+        if (stepMode) mergeSortStep();
+        else timer = setInterval(mergeSortStep, 1000);
+      }
+      function generateMergeActions(start, end, actions) {
+        if (start >= end) return;
+        const mid = Math.floor((start + end) / 2);
+        generateMergeActions(start, mid, actions);
+        generateMergeActions(mid + 1, end, actions);
+        actions.push({ start, mid, end });
+      }
+      function mergeSortStep() {
+        if (!mergeState) return;
+        if (mergeState.currentStep >= mergeState.actions.length) {
+          clearTimer();
+          drawArray(
+            mergeState.displayArr,
+            [],
+            [...Array(mergeState.arr.length).keys()]
+          );
+          updateStepInfo("Merge Sort Completed!");
+          return;
         }
-        return -1;
-      }
+        const { start, mid, end } = mergeState.actions[mergeState.currentStep];
+        mergeState.highlights = [];
+        for (let k = start; k <= end; k++) mergeState.highlights.push(k);
+        updateStepInfo(
+          `Merging indices [${start} - ${mid}] and [${
+            mid + 1
+          } - ${end}]. Step ${mergeState.currentStep + 1} of ${
+            mergeState.actions.length
+          }`
+        );
 
-      async function binarySearch(target) {
-        let left = 0;
-        let right = array.length - 1;
+        const left = mergeState.displayArr.slice(start, mid + 1);
+        const right = mergeState.displayArr.slice(mid + 1, end + 1);
 
-        while (left <= right) {
-          if (!isAnimating) return -1;
-          while (isPaused) {
-            await sleep(100);
-          }
-
-          const mid = Math.floor((left + right) / 2);
-
-          // Highlight search range
-          const range = [];
-          for (let i = left; i <= right; i++) {
-            range.push(i);
-          }
-          renderArray(range, [mid], []);
-          await sleep(animationSpeed);
-
-          if (array[mid] === target) {
-            return mid;
-          } else if (array[mid] < target) {
-            left = mid + 1;
-          } else {
-            right = mid - 1;
-          }
+        let i = 0,
+          j = 0;
+        const merged = [];
+        while (i < left.length && j < right.length) {
+          if (left[i] <= right[j]) merged.push(left[i++]);
+          else merged.push(right[j++]);
         }
+        while (i < left.length) merged.push(left[i++]);
+        while (j < right.length) merged.push(right[j++]);
 
-        return -1;
+        setTimeout(() => {
+          for (let k = 0; k < merged.length; k++) {
+            mergeState.displayArr[start + k] = merged[k];
+          }
+          mergeState.currentStep++;
+          mergeState.highlights = [];
+          drawArray(mergeState.displayArr, [], []);
+          if (mergeState.currentStep >= mergeState.actions.length) {
+            updateStepInfo("Merge Sort Completed!");
+            clearTimer();
+          }
+        }, 700);
+        if (mergeState.stepMode) mergeState.currentStep++;
       }
 
-      // Finish animation
-      function finishAnimation(sortedIndices) {
-        renderArray([], [], sortedIndices);
-        document.getElementById("statusMessage").textContent =
-          "Sorting complete!";
-        document.getElementById("statusMessage").className =
-          "status-message success";
-        isAnimating = false;
-        document.getElementById("startBtn").disabled = false;
+      // Dropdown menu expand/collapse on click
+      document.querySelectorAll("#topics .dropdown").forEach((dropdown) => {
+        dropdown.addEventListener("click", (e) => {
+          // Prevent event bubbling to parent clicks
+          e.stopPropagation();
+          // Close other open dropdowns except this
+          document.querySelectorAll("#topics .dropdown").forEach((d) => {
+            if (d !== dropdown) d.classList.remove("open");
+          });
+          dropdown.classList.toggle("open");
+        });
+      });
+
+      // Handle submenu item clicks to select algorithm
+      document
+        .querySelectorAll("#topics .dropdown > ul > li")
+        .forEach((item) => {
+          item.addEventListener("click", (e) => {
+            e.stopPropagation();
+            // Remove all selected classes first
+            document
+              .querySelectorAll("#topics li")
+              .forEach((li) => li.classList.remove("selected"));
+            // Add selected class to clicked submenu item
+            item.classList.add("selected");
+            currentAlgorithm = item.textContent.trim();
+            showAlgorithmInfo(currentAlgorithm);
+            resetVisualization();
+          });
+        });
+
+      // Single non-dropdown items selection
+      document
+        .querySelectorAll("#topics > li:not(.dropdown)")
+        .forEach((item) => {
+          item.addEventListener("click", (e) => {
+            e.stopPropagation();
+            document
+              .querySelectorAll("#topics li")
+              .forEach((li) => li.classList.remove("selected"));
+            item.classList.add("selected");
+            currentAlgorithm = item.textContent.trim();
+            showAlgorithmInfo(currentAlgorithm);
+            resetVisualization();
+          });
+        });
+
+      userInput.addEventListener("change", () => {
+        let input = userInput.value.trim();
+        if (!input) return;
+        arrayData = input
+          .split(",")
+          .map((x) => parseInt(x.trim()))
+          .filter((n) => !isNaN(n));
+        resetVisualization();
+      });
+
+      startBtn.addEventListener("click", () => {
+        if (!currentAlgorithm || !arrayData.length) {
+          alert("Please select an algorithm and enter valid input.");
+          return;
+        }
+        if (currentAlgorithm.toLowerCase() === "bubble sort") startBubbleSort();
+        else if (currentAlgorithm.toLowerCase() === "merge sort")
+          startMergeSort();
+        else alert("Animation not yet implemented for this algorithm.");
+      });
+      pauseBtn.addEventListener("click", () => clearTimer());
+      stepBtn.addEventListener("click", () => {
+        if (!currentAlgorithm) return;
+        if (currentAlgorithm.toLowerCase() === "bubble sort") {
+          if (!bubbleState) startBubbleSort(true);
+          else bubbleSortStep();
+        } else if (currentAlgorithm.toLowerCase() === "merge sort") {
+          if (!mergeState) startMergeSort(true);
+          else mergeSortStep();
+        }
+      });
+      resetBtn.addEventListener("click", resetVisualization);
+
+      viewAlgoBtn.addEventListener("click", () => {
+        if (!currentAlgorithm) {
+          alert("Please select an algorithm first.");
+          return;
+        }
+        showModalInfo(currentAlgorithm);
+      });
+
+      // Modal controls
+      modalClose.addEventListener("click", () => {
+        modal.classList.remove("show");
+        document.body.classList.remove("modal-open");
+      });
+      modal.addEventListener("mousedown", (e) => {
+        if (e.target === modal) {
+          modal.classList.remove("show");
+          document.body.classList.remove("modal-open");
+        }
+      });
+
+      // Show algorithm info in side panel
+      function showAlgorithmInfo(algo) {
+        if (!algo) return;
+        if (algo.toLowerCase() === "bubble sort") {
+          algoTitle.textContent = "Bubble Sort";
+          algoDesc.textContent =
+            "Bubble Sort repeatedly compares adjacent elements and swaps if out of order.";
+          algoCode.textContent = `function bubbleSort(arr){
+  for(let i=0; i<arr.length-1; i++){
+    for(let j=0; j<arr.length-1-i; j++){
+      if(arr[j]>arr[j+1]){
+        [arr[j], arr[j+1]] = [arr[j+1], arr[j]];
+      }
+    }
+  }
+  return arr;
+}`;
+        } else if (algo.toLowerCase() === "merge sort") {
+          algoTitle.textContent = "Merge Sort";
+          algoDesc.textContent =
+            "Merge Sort divides the list, recursively sorts halves, and merges sorted halves.";
+          algoCode.textContent = `function mergeSort(arr){
+  if(arr.length<=1) return arr;
+  let mid = Math.floor(arr.length/2);
+  let left = mergeSort(arr.slice(0,mid));
+  let right = mergeSort(arr.slice(mid));
+  return merge(left,right);
+}
+function merge(left,right){
+  let res=[], i=0, j=0;
+  while(i<left.length && j<right.length){
+    if(left[i]<=right[j]) res.push(left[i++]);
+    else res.push(right[j++]);
+  }
+  return res.concat(left.slice(i)).concat(right.slice(j));
+}`;
+        } else {
+          algoTitle.textContent = algo;
+          algoDesc.textContent = "Description not available.";
+          algoCode.textContent = "Code not available.";
+        }
       }
 
-      // Helper function
-      function sleep(ms) {
-        return new Promise((resolve) => setTimeout(resolve, ms));
+      // Show algorithm info in modal (View Algo button)
+      function showModalInfo(algo) {
+        let title = "",
+          desc = "",
+          code = "";
+        if (algo.toLowerCase() === "bubble sort") {
+          title = "Bubble Sort";
+          desc =
+            "Bubble Sort repeatedly compares adjacent elements and swaps if out of order.";
+          code = `function bubbleSort(arr){
+  for(let i=0; i<arr.length-1; i++){
+    for(let j=0; j<arr.length-1-i; j++){
+      if(arr[j]>arr[j+1]){
+        [arr[j], arr[j+1]] = [arr[j+1], arr[j]];
       }
+    }
+  }
+  return arr;
+}`;
+        } else if (algo.toLowerCase() === "merge sort") {
+          title = "Merge Sort";
+          desc =
+            "Merge Sort divides the list, recursively sorts halves, and merges sorted halves.";
+          code = `function mergeSort(arr){
+  if(arr.length<=1) return arr;
+  let mid = Math.floor(arr.length/2);
+  let left = mergeSort(arr.slice(0,mid));
+  let right = mergeSort(arr.slice(mid));
+  return merge(left,right);
+}
+function merge(left,right){
+  let res=[], i=0, j=0;
+  while(i<left.length && j<right.length){
+    if(left[i]<=right[j]) res.push(left[i++]);
+    else res.push(right[j++]);
+  }
+  return res.concat(left.slice(i)).concat(right.slice(j));
+}`;
+        } else {
+          title = algo;
+          desc = "Description not available.";
+          code = "Code not available.";
+        }
+        algoModalTitle.textContent = title;
+        algoModalDesc.innerHTML = `
+      <h3>About</h3>
+      <p>${desc}</p>
+      <h3>Algorithm Code</h3>
+      <pre>${code}</pre>
+    `;
+        modal.classList.add("show");
+        document.body.classList.add("modal-open");
+      }
+
+      // Initialize
+      drawArray([]);
     </script>
   </body>
 </html>
-className = 'particle'; particle.
