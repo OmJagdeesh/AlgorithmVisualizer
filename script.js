@@ -1,4 +1,3 @@
-
       // DOM elements
       const viz = document.getElementById("viz");
       const stepInfo = document.getElementById("step-info");
