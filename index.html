@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Futuristic Algorithm Visualizer</title>
+
+    <!-- Google Fonts -->
+    <link
+      href="https://fonts.googleapis.com/css?family=Orbitron:700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css?family=Quicksand:500,700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- External CSS -->
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div id="main-bg"></div>
+
+    <!-- Sidebar -->
+    <nav id="sidebar">
+      <h2>AlgoVisual</h2>
+      <button class="tab-btn" id="algoTab">Algorithm Viewer</button>
+      <ul id="topics">
+        <li class="dropdown">
+          Sorting
+          <ul>
+            <li id="bubbleSortBtn">Bubble Sort</li>
+            <li id="mergeSortBtn">Merge Sort</li>
+            <li id="quickSortBtn">Quick Sort</li>
+          </ul>
+        </li>
+        <li class="dropdown">
+          Searching
+          <ul>
+            <li id="linearSearchBtn">Linear Search</li>
+            <li id="binarySearchBtn">Binary Search</li>
+          </ul>
+        </li>
+        <li class="dropdown">
+          Trees
+          <ul>
+            <li id="linearTreeBtn">Linear Tree</li>
+            <li id="binaryTreeBtn">Binary Tree</li>
+          </ul>
+        </li>
+        <li id="dijkstraBtn">Dijkstra's</li>
+      </ul>
+    </nav>
+
+    <!-- Main Visualizer -->
+    <main id="visualizer">
+      <div id="viz"></div>
+      <div id="step-info"></div>
+
+      <div id="controls">
+        <button title="Start" aria-label="Start Animation">&#9654;</button>
+        <button title="Pause" aria-label="Pause Animation">
+          &#10073;&#10073;
+        </button>
+        <button title="Step" aria-label="Step Animation">&#9654;&#9654;</button>
+        <button title="Reset" aria-label="Reset Animation">&#8635;</button>
+
+        <input
+          id="user-input"
+          aria-label="Input Array"
+          type="text"
+          placeholder="Enter numbers separated by commas (e.g., 3,5,1,9)"
+        />
+
+        <button id="viewAlgoBtn" aria-label="View Algorithm Details">
+          View Algo
+        </button>
+      </div>
+    </main>
+
+    <!-- Info Panel -->
+    <aside id="algo-info" aria-label="Algorithm Information" hidden>
+      <h2 id="algo-title">Algorithm Title</h2>
+      <pre id="algo-code" aria-label="Algorithm Code"></pre>
+      <p id="algo-desc">Algorithm description goes here.</p>
+    </aside>
+
+    <!-- Modal for Algorithm Details -->
+    <div
+      class="algo-modal"
+      id="algoModal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="algoModalTitle"
+      aria-describedby="algoModalDesc"
+      tabindex="-1"
+    >
+      <div class="modal-content">
+        <button class="modal-close" aria-label="Close">&times;</button>
+        <h2 id="algoModalTitle">Algorithm Info</h2>
+        <div id="algoModalDesc"></div>
+      </div>
+    </div>
+
+    <!-- External JS -->
+    <script src="script.js"></script>
+  </body>
+</html>
