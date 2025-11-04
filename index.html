@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AlgoViz Pro - Interactive Algorithm Visualizer</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="bg-animation"></div>
+
+    <!-- Floating particles -->
+    <div id="particles"></div>
+
+    <header class="header">
+      <div class="logo">
+        <div class="logo-icon">📊</div>
+        AlgoViz Pro
+      </div>
+      <div class="speed-control">
+        <span>Speed:</span>
+        <input
+          type="range"
+          class="speed-slider"
+          id="speedSlider"
+          min="100"
+          max="2000"
+          value="1000"
+        />
+        <span id="speedValue">1s</span>
+      </div>
+    </header>
+
+    <div class="container">
+      <aside class="sidebar">
+        <h3>Algorithms</h3>
+
+        <div class="algo-category">
+          <div class="category-title">Sorting</div>
+          <button class="algo-btn active" data-algo="bubble">
+            Bubble Sort
+          </button>
+          <button class="algo-btn" data-algo="selection">Selection Sort</button>
+          <button class="algo-btn" data-algo="insertion">Insertion Sort</button>
+          <button class="algo-btn" data-algo="merge">Merge Sort</button>
+          <button class="algo-btn" data-algo="quick">Quick Sort</button>
+        </div>
+
+        <div class="algo-category">
+          <div class="category-title">Searching</div>
+          <button class="algo-btn" data-algo="linear">Linear Search</button>
+          <button class="algo-btn" data-algo="binary">Binary Search</button>
+        </div>
+      </aside>
+
+      <main class="main-content">
+        <div class="controls">
+          <div class="input-group">
+            <input
+              type="text"
+              class="array-input"
+              id="arrayInput"
+              placeholder="Enter numbers (e.g., 64,34,25,12,22)"
+            />
+            <button class="control-btn" id="generateBtn">Random</button>
+          </div>
+          <button class="control-btn" id="startBtn">▶ Start</button>
+          <button class="control-btn" id="pauseBtn">⏸ Pause</button>
+          <button class="control-btn" id="resetBtn">↺ Reset</button>
+        </div>
+
+        <div class="viz-container">
+          <div class="viz-canvas" id="vizCanvas"></div>
+          <div class="status-message" id="statusMessage">
+            Ready to visualize
+          </div>
+        </div>
+
+        <div class="info-panel">
+          <h2 class="info-title" id="algoTitle">Bubble Sort</h2>
+          <p class="info-description" id="algoDescription">
+            Bubble Sort is a simple sorting algorithm that repeatedly steps
+            through the list, compares adjacent elements and swaps them if they
+            are in the wrong order.
+          </p>
+
+          <div class="complexity-table">
+            <div class="complexity-row">
+              <span>Time Complexity (Best):</span>
+              <span id="timeBest">O(n)</span>
+            </div>
+            <div class="complexity-row">
+              <span>Time Complexity (Average):</span>
+              <span id="timeAvg">O(n²)</span>
+            </div>
+            <div class="complexity-row">
+              <span>Time Complexity (Worst):</span>
+              <span id="timeWorst">O(n²)</span>
+            </div>
+            <div class="complexity-row">
+              <span>Space Complexity:</span>
+              <span id="space">O(1)</span>
+            </div>
+          </div>
+
+          <pre class="code-snippet" id="codeSnippet">
+function bubbleSort(arr) {
+    for (let i = 0; i < arr.length - 1; i++) {
+        for (let j = 0; j < arr.length - i - 1; j++) {
+            if (arr[j] > arr[j + 1]) {
+                [arr[j], arr[j + 1]] = [arr[j + 1], arr[j]];
+            }
+        }
+    }
+    return arr;
+}</pre
+          >
+        </div>
+      </main>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
