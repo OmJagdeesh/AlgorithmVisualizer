@@ -67,7 +67,16 @@
           <button class="control-btn" id="startBtn">▶ Start</button>
           <button class="control-btn" id="pauseBtn">⏸ Pause</button>
           <button class="control-btn" id="resetBtn">↺ Reset</button>
+          <button class="control-btn" id="voiceBtn">🎤 Voice</button>
         </div>
+
+        <!-- Voice visualizer -->
+        <div id="voiceIndicator">
+          <div class="wave"></div>
+          <div class="wave"></div>
+          <div class="wave"></div>
+        </div>
+        <p id="voiceTranscript">Say a command...</p>
 
         <div class="viz-container">
           <div class="viz-canvas" id="vizCanvas"></div>
@@ -108,6 +117,7 @@ function bubbleSort(arr) {
     for (let i = 0; i < arr.length - 1; i++) {
         for (let j = 0; j < arr.length - i - 1; j++) {
             if (arr[j] > arr[j + 1]) {
+                // Swap elements
                 [arr[j], arr[j + 1]] = [arr[j + 1], arr[j]];
             }
         }
@@ -119,6 +129,10 @@ function bubbleSort(arr) {
       </main>
     </div>
 
+    <!-- GSAP Animation Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+    <!-- Main Script -->
     <script src="script.js"></script>
   </body>
 </html>
