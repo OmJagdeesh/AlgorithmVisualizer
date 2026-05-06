@@ -46,6 +46,9 @@ export function handleVoiceTranscript(text) {
     else if (text.includes("quick")) selectAndStart("quick");
     else if (text.includes("linear")) selectAndStart("linear");
     else if (text.includes("binary")) selectAndStart("binary");
+    else if (text.includes("preorder") || text.includes("pre order")) selectAndStart("preorder");
+    else if (text.includes("inorder") || text.includes("in order")) selectAndStart("inorder");
+    else if (text.includes("postorder") || text.includes("post order")) selectAndStart("postorder");
     else {
       startAnimation();
     }

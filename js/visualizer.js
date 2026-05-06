@@ -93,3 +93,91 @@ export async function animateSwap(idxA, idxB) {
     await sleep(Math.max(80, state.animationSpeed / 3));
   }
 }
+
+export function renderTree(activeIdx = -1, visitedIndices = []) {
+  const canvas = $("#vizCanvas");
+  if (!canvas) return;
+  canvas.innerHTML = "";
+
+  const n = state.array.length;
+  if (n === 0) return;
+
+  const width = canvas.clientWidth || 800;
+  const height = canvas.clientHeight || 400;
+
+  // Build an SVG for the edges
+  const svgNS = "http://www.w3.org/2000/svg";
+  const svg = document.createElementNS(svgNS, "svg");
+  svg.setAttribute("class", "tree-edge");
+  svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+  canvas.appendChild(svg);
+
+  // Determine positions for a binary tree
+  // root at index 0, left child 2*i + 1, right child 2*i + 2
+  const positions = [];
+  const levelHeight = 60;
+  const nodeRadius = 20;
+
+  function getDepth(idx) {
+    return Math.floor(Math.log2(idx + 1));
+  }
+  
+  const maxDepth = getDepth(n - 1);
+
+  for (let i = 0; i < n; i++) {
+    const depth = getDepth(i);
+    const nodesInLevel = Math.pow(2, depth);
+    const indexInLevel = i - (nodesInLevel - 1);
+    
+    // Distribute nodes evenly across the width
+    const levelWidth = width / (nodesInLevel + 1);
+    const x = levelWidth * (indexInLevel + 1);
+    const y = 40 + depth * levelHeight;
+    
+    positions[i] = { x, y };
+
+    // Draw edge to parent if not root
+    if (i > 0) {
+      const parentIdx = Math.floor((i - 1) / 2);
+      const parentPos = positions[parentIdx];
+      
+      const line = document.createElementNS(svgNS, "line");
+      line.setAttribute("x1", parentPos.x);
+      line.setAttribute("y1", parentPos.y);
+      line.setAttribute("x2", x);
+      line.setAttribute("y2", y);
+      
+      if (activeIdx === i || visitedIndices.includes(i)) {
+        line.classList.add("highlight");
+      }
+      svg.appendChild(line);
+    }
+  }
+
+  // Draw the nodes
+  for (let i = 0; i < n; i++) {
+    const pos = positions[i];
+    
+    const node = document.createElement("div");
+    node.className = "tree-node";
+    node.style.left = `${pos.x - nodeRadius}px`;
+    node.style.top = `${pos.y - nodeRadius}px`;
+    node.textContent = state.array[i];
+
+    if (activeIdx === i) {
+      node.classList.add("highlight");
+    } else if (visitedIndices.includes(i)) {
+      node.classList.add("visited");
+    }
+
+    canvas.appendChild(node);
+  }
+
+  if (state.useGSAP && window.gsap && activeIdx === -1 && visitedIndices.length === 0) {
+    window.gsap.fromTo(
+      "#vizCanvas .tree-node",
+      { opacity: 0, scale: 0 },
+      { opacity: 1, scale: 1, duration: 0.5, stagger: 0.05, ease: "back.out(1.7)" }
+    );
+  }
+}

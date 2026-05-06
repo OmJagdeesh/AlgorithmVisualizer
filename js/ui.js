@@ -49,7 +49,13 @@ export function resetAll() {
   if (startBtn) startBtn.disabled = false;
   const pauseBtn = $("#pauseBtn");
   if (pauseBtn) pauseBtn.textContent = "⏸ Pause";
-  renderArray();
+
+  if (["preorder", "inorder", "postorder"].includes(state.currentAlgorithm)) {
+    import('./visualizer.js').then(module => module.renderTree());
+  } else {
+    import('./visualizer.js').then(module => module.renderArray());
+  }
+  
   setStatus("Ready to visualize", "");
 }
 

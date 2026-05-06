@@ -122,5 +122,47 @@ export const algorithmInfo = {
   }
   return -1;
 }`
+  },
+  preorder: {
+    title: "Pre-order Traversal",
+    description: "Pre-order traversal visits the current node first, then recursively visits the left subtree, followed by the right subtree. Used to create a copy of the tree or get prefix expressions.",
+    timeBest: "O(n)",
+    timeAvg: "O(n)",
+    timeWorst: "O(n)",
+    space: "O(h)",
+    code: `function preorder(node) {
+  if (!node) return;
+  visit(node);
+  preorder(node.left);
+  preorder(node.right);
+}`
+  },
+  inorder: {
+    title: "In-order Traversal",
+    description: "In-order traversal recursively visits the left subtree, then the current node, and finally the right subtree. For Binary Search Trees, it retrieves data in sorted order.",
+    timeBest: "O(n)",
+    timeAvg: "O(n)",
+    timeWorst: "O(n)",
+    space: "O(h)",
+    code: `function inorder(node) {
+  if (!node) return;
+  inorder(node.left);
+  visit(node);
+  inorder(node.right);
+}`
+  },
+  postorder: {
+    title: "Post-order Traversal",
+    description: "Post-order traversal recursively visits the left subtree, then the right subtree, and finally the current node. Used to delete a tree or get postfix expressions.",
+    timeBest: "O(n)",
+    timeAvg: "O(n)",
+    timeWorst: "O(n)",
+    space: "O(h)",
+    code: `function postorder(node) {
+  if (!node) return;
+  postorder(node.left);
+  postorder(node.right);
+  visit(node);
+}`
   }
 };
