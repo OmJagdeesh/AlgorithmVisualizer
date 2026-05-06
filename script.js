@@ -1,7 +1,7 @@
 import { $, $$ } from './js/dom.js';
-import { createParticles, updateAlgorithmInfo } from './js/ui.js';
+import { createParticles, updateAlgorithmInfo, resetAll } from './js/ui.js';
 import { renderArray } from './js/visualizer.js';
-import { startAnimation, pauseAnimation, resetAll, generateRandomArray, handleArrayInput, handleSpeedChange } from './js/controls.js';
+import { startAnimation, pauseAnimation, generateRandomArray, handleArrayInput, handleSpeedChange } from './js/controls.js';
 import { toggleVoice, setupVoiceRecognition } from './js/voice.js';
 import { state } from './js/state.js';
 

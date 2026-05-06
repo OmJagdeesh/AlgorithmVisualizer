@@ -1,6 +1,6 @@
 import { $, $$ } from './dom.js';
-import { setStatus, updateAlgorithmInfo } from './ui.js';
-import { startAnimation, pauseAnimation, resetAll, generateRandomArray } from './controls.js';
+import { setStatus, updateAlgorithmInfo, resetAll } from './ui.js';
+import { startAnimation, pauseAnimation, generateRandomArray } from './controls.js';
 import { state } from './state.js';
 
 let recognition = null;
