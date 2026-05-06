@@ -6,6 +6,7 @@ import { finishAnimation } from '../ui.js';
 export async function preorderAnim() {
   const n = state.array.length;
   const visited = [];
+  const result = [];
 
   async function traverse(idx) {
     if (idx >= n || !state.isAnimating) return;
@@ -15,6 +16,7 @@ export async function preorderAnim() {
     renderTree(idx, visited);
     await sleep(Math.max(200, state.animationSpeed));
     visited.push(idx);
+    result.push(state.array[idx]);
 
     // Left child
     await traverse(2 * idx + 1);
@@ -27,13 +29,14 @@ export async function preorderAnim() {
   
   if (state.isAnimating) {
     renderTree(-1, visited);
-    finishAnimation();
+    finishAnimation(`Traversal: ${result.join(" → ")}`);
   }
 }
 
 export async function inorderAnim() {
   const n = state.array.length;
   const visited = [];
+  const result = [];
 
   async function traverse(idx) {
     if (idx >= n || !state.isAnimating) return;
@@ -46,6 +49,7 @@ export async function inorderAnim() {
     renderTree(idx, visited);
     await sleep(Math.max(200, state.animationSpeed));
     visited.push(idx);
+    result.push(state.array[idx]);
     
     // Right child
     await traverse(2 * idx + 2);
@@ -55,13 +59,14 @@ export async function inorderAnim() {
   
   if (state.isAnimating) {
     renderTree(-1, visited);
-    finishAnimation();
+    finishAnimation(`Traversal: ${result.join(" → ")}`);
   }
 }
 
 export async function postorderAnim() {
   const n = state.array.length;
   const visited = [];
+  const result = [];
 
   async function traverse(idx) {
     if (idx >= n || !state.isAnimating) return;
@@ -77,12 +82,13 @@ export async function postorderAnim() {
     renderTree(idx, visited);
     await sleep(Math.max(200, state.animationSpeed));
     visited.push(idx);
+    result.push(state.array[idx]);
   }
 
   await traverse(0);
   
   if (state.isAnimating) {
     renderTree(-1, visited);
-    finishAnimation();
+    finishAnimation(`Traversal: ${result.join(" → ")}`);
   }
 }

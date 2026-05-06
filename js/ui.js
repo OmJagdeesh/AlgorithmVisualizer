@@ -59,9 +59,9 @@ export function resetAll() {
   setStatus("Ready to visualize", "");
 }
 
-export function finishAnimation() {
+export function finishAnimation(msg = "Sorting complete!") {
   state.isAnimating = false;
   const startBtn = $("#startBtn");
   if (startBtn) startBtn.disabled = false;
-  setStatus("Sorting complete!", "success");
+  setStatus(msg, "success");
 }
