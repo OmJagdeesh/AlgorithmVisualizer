@@ -38,7 +38,12 @@ document.addEventListener("DOMContentLoaded", () => {
       btn.classList.add("active");
       state.currentAlgorithm = btn.dataset.algo;
       updateAlgorithmInfo();
-      resetAll();
+      
+      if (state.currentAlgorithm === "dijkstra") {
+        generateRandomArray();
+      } else {
+        resetAll();
+      }
     });
   });
 

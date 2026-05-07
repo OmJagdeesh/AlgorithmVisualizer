@@ -49,6 +49,7 @@ export function handleVoiceTranscript(text) {
     else if (text.includes("preorder") || text.includes("pre order")) selectAndStart("preorder");
     else if (text.includes("inorder") || text.includes("in order")) selectAndStart("inorder");
     else if (text.includes("postorder") || text.includes("post order")) selectAndStart("postorder");
+    else if (text.includes("dijkstra") || text.includes("graph")) selectAndStart("dijkstra");
     else {
       startAnimation();
     }

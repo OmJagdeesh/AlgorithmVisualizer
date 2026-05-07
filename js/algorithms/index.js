@@ -1,6 +1,7 @@
 import { bubbleSortAnim, selectionSortAnim, insertionSortAnim, mergeSortAnim, quickSortAnim } from './sorting.js';
 import { searchAnim } from './searching.js';
 import { preorderAnim, inorderAnim, postorderAnim } from './trees.js';
+import { dijkstraAnim } from './graphs.js';
 import { setStatus } from '../ui.js';
 import { state } from '../state.js';
 import { $ } from '../dom.js';
@@ -20,6 +21,7 @@ export async function runAlgorithm(algo) {
       case "preorder": await preorderAnim(); break;
       case "inorder": await inorderAnim(); break;
       case "postorder": await postorderAnim(); break;
+      case "dijkstra": await dijkstraAnim(); break;
       default:
         setStatus("Unknown algorithm", "");
         state.isAnimating = false;

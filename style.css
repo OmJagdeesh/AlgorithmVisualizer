@@ -478,3 +478,16 @@ border: 1px solid rgba(251, 191, 36, 0.3);
   stroke: var(--warning);
   stroke-width: 3px;
 }
+
+.tree-edge line.path {
+  stroke: var(--success);
+  stroke-width: 4px;
+}
+
+.edge-weight {
+  fill: white;
+  font-size: 14px;
+  font-weight: bold;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+  pointer-events: none;
+}

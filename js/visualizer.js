@@ -181,3 +181,97 @@ export function renderTree(activeIdx = -1, visitedIndices = []) {
     );
   }
 }
+
+export function renderGraph(activeNode = -1, visitedNodes = [], activeEdges = [], shortestPath = [], distances = {}) {
+  const canvas = $("#vizCanvas");
+  if (!canvas) return;
+  canvas.innerHTML = "";
+
+  const n = state.array.length;
+  if (n === 0) return;
+
+  const width = canvas.clientWidth || 800;
+  const height = canvas.clientHeight || 400;
+  const radius = Math.min(width, height) / 2 - 40;
+  const centerX = width / 2;
+  const centerY = height / 2;
+
+  const svgNS = "http://www.w3.org/2000/svg";
+  const svg = document.createElementNS(svgNS, "svg");
+  svg.setAttribute("class", "tree-edge");
+  svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+  canvas.appendChild(svg);
+
+  // Compute node positions
+  const positions = [];
+  for (let i = 0; i < n; i++) {
+    const angle = (i * 2 * Math.PI) / n - Math.PI / 2;
+    positions.push({
+      x: centerX + radius * Math.cos(angle),
+      y: centerY + radius * Math.sin(angle)
+    });
+  }
+
+  // Draw edges
+  state.graphEdges.forEach((edge) => {
+    const uPos = positions[edge.u];
+    const vPos = positions[edge.v];
+    const midX = (uPos.x + vPos.x) / 2;
+    const midY = (uPos.y + vPos.y) / 2;
+
+    const line = document.createElementNS(svgNS, "line");
+    line.setAttribute("x1", uPos.x);
+    line.setAttribute("y1", uPos.y);
+    line.setAttribute("x2", vPos.x);
+    line.setAttribute("y2", vPos.y);
+
+    const isPath = shortestPath.some((p, i) => i > 0 && ((shortestPath[i-1] === edge.u && p === edge.v) || (shortestPath[i-1] === edge.v && p === edge.u)));
+    const isActive = activeEdges.some(e => (e.u === edge.u && e.v === edge.v) || (e.u === edge.v && e.v === edge.u));
+
+    if (isPath) {
+      line.classList.add("path");
+    } else if (isActive) {
+      line.classList.add("highlight");
+    }
+    svg.appendChild(line);
+
+    // Draw weight
+    const text = document.createElementNS(svgNS, "text");
+    text.setAttribute("x", midX);
+    text.setAttribute("y", midY - 5);
+    text.setAttribute("class", "edge-weight");
+    text.setAttribute("text-anchor", "middle");
+    text.textContent = edge.weight;
+    svg.appendChild(text);
+  });
+
+  // Draw nodes
+  for (let i = 0; i < n; i++) {
+    const pos = positions[i];
+    
+    const node = document.createElement("div");
+    node.className = "tree-node";
+    node.style.left = `${pos.x - 20}px`;
+    node.style.top = `${pos.y - 20}px`;
+    node.textContent = state.array[i];
+
+    if (activeNode === i) {
+      node.classList.add("highlight");
+    } else if (visitedNodes.includes(i) || shortestPath.includes(i)) {
+      node.classList.add("visited");
+    }
+
+    // Display distance above node if available
+    if (distances[i] !== undefined && distances[i] !== Infinity) {
+      const distLabel = document.createElement("div");
+      distLabel.className = "bar-value highlight";
+      distLabel.style.position = "absolute";
+      distLabel.style.left = `${pos.x - 20}px`;
+      distLabel.style.top = `${pos.y + 25}px`;
+      distLabel.textContent = `d:${distances[i]}`;
+      canvas.appendChild(distLabel);
+    }
+
+    canvas.appendChild(node);
+  }
+}

@@ -164,5 +164,33 @@ export const algorithmInfo = {
   postorder(node.right);
   visit(node);
 }`
+  },
+  dijkstra: {
+    title: "Dijkstra's Algorithm",
+    description: "Dijkstra's algorithm finds the shortest paths between nodes in a graph. It picks the unvisited vertex with the lowest distance, calculates the distance through it to each unvisited neighbor, and updates the neighbor's distance if smaller.",
+    timeBest: "O((V+E) log V)",
+    timeAvg: "O((V+E) log V)",
+    timeWorst: "O((V+E) log V)",
+    space: "O(V)",
+    code: `function dijkstra(graph, start) {
+  const dist = {};
+  const pq = new PriorityQueue();
+  pq.enqueue(start, 0);
+  dist[start] = 0;
+  
+  while (!pq.isEmpty()) {
+    const {node, d} = pq.dequeue();
+    if (d > dist[node]) continue;
+    for (let neighbor of graph[node]) {
+      let newDist = dist[node] + neighbor.weight;
+      if (newDist < dist[neighbor.node]) {
+        dist[neighbor.node] = newDist;
+        pq.enqueue(neighbor.node, newDist);
+      }
+    }
+  }
+}`
   }
 };
+
+state.graphEdges = [];

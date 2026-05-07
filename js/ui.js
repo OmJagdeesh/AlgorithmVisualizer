@@ -50,7 +50,9 @@ export function resetAll() {
   const pauseBtn = $("#pauseBtn");
   if (pauseBtn) pauseBtn.textContent = "⏸ Pause";
 
-  if (["preorder", "inorder", "postorder"].includes(state.currentAlgorithm)) {
+  if (state.currentAlgorithm === "dijkstra") {
+    import('./visualizer.js').then(module => module.renderGraph());
+  } else if (["preorder", "inorder", "postorder"].includes(state.currentAlgorithm)) {
     import('./visualizer.js').then(module => module.renderTree());
   } else {
     import('./visualizer.js').then(module => module.renderArray());
